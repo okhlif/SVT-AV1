@@ -2027,7 +2027,7 @@ uint8_t product_full_mode_decision(
 
 
     if (candidate_ptr->type == INTER_MODE && candidate_ptr->merge_flag == EB_TRUE) {
-        context_ptr->md_ep_pipe_sb[cu_ptr->leaf_index].chroma_distortion = buffer_ptr_array[lowestCostIndex]->candidate_ptr->chroma_distortion;
+        context_ptr->md_ep_pipe_sb[cu_ptr->mds_idx].chroma_distortion = buffer_ptr_array[lowestCostIndex]->candidate_ptr->chroma_distortion;
     }
 
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].full_distortion = buffer_ptr_array[lowestCostIndex]->candidate_ptr->full_distortion;
