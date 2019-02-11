@@ -407,7 +407,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 2                                            LIGHT: disable_z2_prediction && disable_angle_refinement
     // 3                                            LIGHT per block : disable_z2_prediction && disable_angle_refinement  for 64/32/4
     // 4                                            FULL   
-    if (picture_control_set_ptr->enc_mode <= ENC_M2) {
+    if (picture_control_set_ptr->enc_mode == ENC_M0) {
         if (picture_control_set_ptr->temporal_layer_index == 0)
             picture_control_set_ptr->intra_pred_mode = 4;
         else
