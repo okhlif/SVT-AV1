@@ -1779,20 +1779,17 @@ void  inject_intra_candidates(
         disable_z2_prediction       = 0;
         disable_angle_refinement    = 0;
         disable_angle_prediction    = 1;
-    }
-    else if (picture_control_set_ptr->parent_pcs_ptr->intra_pred_mode == 1) {
+    } else if (picture_control_set_ptr->parent_pcs_ptr->intra_pred_mode == 1) {
         disable_z2_prediction       = 0;
         disable_angle_refinement    = 0 ;
         disable_angle_prediction    = (context_ptr->blk_geom->sq_size > 16 ||
                                        context_ptr->blk_geom->bwidth == 4 ||
                                        context_ptr->blk_geom->bheight == 4) ? 1 : 0;
-    }
-    else if (picture_control_set_ptr->parent_pcs_ptr->intra_pred_mode == 2) {
+    } else if (picture_control_set_ptr->parent_pcs_ptr->intra_pred_mode == 2) {
         disable_z2_prediction       = 1;
         disable_angle_refinement    = 1;
         disable_angle_prediction    = 0;
-    }
-    else if (picture_control_set_ptr->parent_pcs_ptr->intra_pred_mode == 3) {
+    } else if (picture_control_set_ptr->parent_pcs_ptr->intra_pred_mode == 3) {
         disable_z2_prediction       = (context_ptr->blk_geom->sq_size > 16 ||
                                        context_ptr->blk_geom->bwidth == 4 ||
                                        context_ptr->blk_geom->bheight == 4) ? 1 : 0;
@@ -1800,8 +1797,7 @@ void  inject_intra_candidates(
                                        context_ptr->blk_geom->bwidth == 4 ||
                                        context_ptr->blk_geom->bheight == 4) ? 1 : 0;
         disable_angle_prediction    = 0;
-    }
-    else {
+    } else {
         disable_z2_prediction       = 0;
         disable_angle_refinement    = 0;
         disable_angle_prediction    = 0;
