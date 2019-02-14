@@ -99,7 +99,7 @@ void* set_me_hme_params_oq(
 {
     (void)*picture_control_set_ptr;
     //uint8_t  hmeMeLevel = picture_control_set_ptr->enc_mode;
-    uint8_t  hmeMeLevel = picture_control_set_ptr->enc_mode <= ENC_M3 ? 0: picture_control_set_ptr->enc_mode; // OMK to be revised after new presets
+    uint8_t  hmeMeLevel =  picture_control_set_ptr->enc_mode; // OMK to be revised after new presets
 
     uint32_t inputRatio = sequence_control_set_ptr->luma_width / sequence_control_set_ptr->luma_height;
 
@@ -152,6 +152,11 @@ void* set_me_hme_params_oq(
         }
     }
 
+    me_context_ptr->update_hme_search_center_flag = 1;
+
+    if (input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) 
+        me_context_ptr->update_hme_search_center_flag = 0;
+    
     return EB_NULL;
 };
 /******************************************************
