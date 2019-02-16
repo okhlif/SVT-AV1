@@ -711,15 +711,19 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 1                                            0 step refinement
     // 2                                            1 step refinement
     // 3                                            4 step refinement
+    // 4                                            16 step refinement
 
     Av1Common* cm = picture_control_set_ptr->av1_cm;
+    
 
-    if (picture_control_set_ptr->enc_mode >= ENC_M3)
-        cm->sg_filter_mode = 1;
-    else  if (picture_control_set_ptr->enc_mode == ENC_M2)
-        cm->sg_filter_mode = 2;
-    else  if (picture_control_set_ptr->enc_mode <= ENC_M1)
+    if (picture_control_set_ptr->enc_mode == ENC_M0)
+        cm->sg_filter_mode = 4;
+    else if (picture_control_set_ptr->enc_mode == ENC_M1)
         cm->sg_filter_mode = 3;
+    else if (picture_control_set_ptr->enc_mode == ENC_M2)
+        cm->sg_filter_mode = 2;
+    else
+        cm->sg_filter_mode = 1;
 #endif
 
 #if FAST_WN
