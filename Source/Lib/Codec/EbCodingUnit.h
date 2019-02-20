@@ -348,8 +348,6 @@ extern "C" {
 #if !ADD_DELTA_QP_SUPPORT
         unsigned                        qp                      : 8;
 #endif                                                          
-        unsigned                        size                    : 8;
-        unsigned                        size_log2               : 3;
         unsigned                        picture_left_edge_flag  : 1;
         unsigned                        picture_top_edge_flag   : 1;
         unsigned                        picture_right_edge_flag : 1;

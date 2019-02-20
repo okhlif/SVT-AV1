@@ -214,7 +214,7 @@ EbErrorType PictureControlSetCtor(
 
         return_error = largest_coding_unit_ctor(
             &(objectPtr->sb_ptr_array[sb_index]),
-            (uint8_t)initDataPtr->sb_sz,
+            (uint8_t)initDataPtr->sb_size_pix,
             initDataPtr->picture_width,
             initDataPtr->picture_height,
             (uint16_t)(sb_origin_x * maxCuSize),
