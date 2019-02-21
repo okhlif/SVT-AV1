@@ -21,8 +21,6 @@ Tasks & Questions
 EbErrorType largest_coding_unit_ctor(
     LargestCodingUnit_t        **larget_coding_unit_dbl_ptr,
     uint8_t                        sb_size_pix,
-    uint32_t                       picture_width,
-    uint32_t                       picture_height,
     uint16_t                       sb_origin_x,
     uint16_t                       sb_origin_y,
     uint16_t                       sb_index,
