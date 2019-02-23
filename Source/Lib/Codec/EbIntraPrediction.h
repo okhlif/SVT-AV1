@@ -367,6 +367,27 @@ extern "C" {
         IntraReferenceSamplesOpenLoop_t **context_dbl_ptr);
     extern void IntraOpenLoopReferenceSamplesDtor(
         IntraReferenceSamplesOpenLoop_t  *context_ptr);
+#if OMARK
+    extern EbErrorType update_neighbor_samples_array_open_loop(
+        uint8_t                           *above_ref,
+        uint8_t                            *left_ref,
+        IntraReferenceSamplesOpenLoop_t    *intra_ref_ptr,
+        EbPictureBufferDesc_t              *input_ptr,
+        uint32_t                            stride,
+        uint32_t                            srcOriginX,
+        uint32_t                            srcOriginY,
+        uint8_t                             bwidth,
+        uint8_t                             bheight);
+    extern EbErrorType intra_prediction_open_loop(
+        uint8_t                          ois_intra_mode,
+        uint32_t                         srcOriginX,
+        uint32_t                         srcOriginY,
+        BlockGeom                       *blk_geom,
+        uint8_t                         *above_row,
+        uint8_t                         *left_col,
+        MotionEstimationContext_t       *context_ptr,                  // input parameter, ME context
+        EbAsm                            asm_type);
+#endif
 
     extern EbErrorType UpdateNeighborSamplesArrayOpenLoop(
         IntraReferenceSamplesOpenLoop_t *intra_ref_ptr,

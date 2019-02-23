@@ -14078,7 +14078,9 @@ extern "C" {
         uint32_t                             *intra_sad_interval_index;
         uint32_t                             *inter_sad_interval_index;
         EbHandle                              rc_distortion_histogram_mutex;
-        
+#if OMARK
+        ois_sb_results_t                    **ois_sb_results;
+#endif     
         // Open loop Intra candidate Search Results
         OisCu32Cu16Results_t                **ois_cu32_cu16_results;
         OisCu8Results_t                     **ois_cu8_results;

@@ -262,7 +262,13 @@ void FailingMotionLcu(
                 sortedcuOisSAD = oisResultsPtr->sorted_ois_candidate[rasterScanCuIndex][0].distortion;
             }
 
+#if OIS_TO_BE_UPDATED
 
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[RASTER_SCAN_TO_MD_SCAN[rasterScanCuIndex]];
+            sortedcuOisSAD = OisCuPtr[0].distortion;
+
+#endif
 
             int64_t  meToOisSadDiff = (int32_t)cuMeSAD - (int32_t)sortedcuOisSAD;
             meToOisSadDeviation = (sortedcuOisSAD == 0) || (meToOisSadDiff < 0) ? 0 : (meToOisSadDiff * 100) / sortedcuOisSAD;
@@ -329,7 +335,13 @@ void DetectUncoveredLcu(
                     sortedcuOisSAD = oisResultsPtr->sorted_ois_candidate[rasterScanCuIndex][0].distortion;
                 }
 
+#if OIS_TO_BE_UPDATED
 
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[RASTER_SCAN_TO_MD_SCAN[rasterScanCuIndex]];
+            sortedcuOisSAD = OisCuPtr[0].distortion;
+
+#endif
 
                 int64_t  meToOisSadDiff = (int32_t)cuMeSAD - (int32_t)sortedcuOisSAD;
                 meToOisSadDeviation = (sortedcuOisSAD == 0) || (meToOisSadDiff < 0) ? 0 : (meToOisSadDiff * 100) / sortedcuOisSAD;
@@ -442,7 +454,13 @@ void LumaContrastDetectorLcu(
                 oisResultsPtr->sorted_ois_candidate[3][0].distortion +
                 oisResultsPtr->sorted_ois_candidate[4][0].distortion;
 
+#if OIS_TO_BE_UPDATED
 
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[0];
+            cuOisSAD = OisCuPtr[0].distortion;
+
+#endif
 
             cuMeSAD = picture_control_set_ptr->me_results[sb_index][0].distortionDirection[0].distortion;
 

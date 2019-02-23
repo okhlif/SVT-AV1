@@ -2641,7 +2641,13 @@ EbErrorType EncQpmDeriveDeltaQPForEachLeafLcu(
             }
 
 
+#if OIS_TO_BE_UPDATED
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->parent_pcs_ptr->ois_sb_results[sb_index];
+	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[from_1101_to_85[cu_index]];
+            distortion = OisCuPtr[0].distortion;
 
+#endif
 
 
 

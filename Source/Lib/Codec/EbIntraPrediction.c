@@ -9990,3 +9990,145 @@ EbErrorType AV1IntraPredictionCL(
 
     return return_error;
 }
+#if OMARK
+
+EbErrorType update_neighbor_samples_array_open_loop(
+        uint8_t                           *above_ref,
+        uint8_t                            *left_ref,
+        IntraReferenceSamplesOpenLoop_t    *intra_ref_ptr,
+        EbPictureBufferDesc_t              *input_ptr,
+        uint32_t                            stride,
+        uint32_t                            srcOriginX,
+        uint32_t                            srcOriginY,
+        uint8_t                             bwidth,
+        uint8_t                             bheight)
+{
+
+    EbErrorType    return_error = EB_ErrorNone;
+
+    uint32_t idx;
+    uint8_t  *srcPtr;
+   // uint8_t  *dstPtr;
+    uint8_t  *readPtr;
+
+    uint32_t count;
+
+   // uint8_t *yBorderReverse = intra_ref_ptr->y_intra_reference_array_reverse;
+   // uint8_t *yBorder = intra_ref_ptr->y_intra_reference_array;
+   // uint8_t *yBorderLoc;
+
+    uint32_t width = input_ptr->width;
+    uint32_t height = input_ptr->height;
+    uint32_t blockSizeHalf = bwidth << 1;
+
+    // Adjust the Source ptr to start at the origin of the block being updated
+    srcPtr = input_ptr->bufferY + (((srcOriginY + input_ptr->origin_y) * stride) + (srcOriginX + input_ptr->origin_x));
+
+    // Adjust the Destination ptr to start at the origin of the Intra reference array
+  //  dstPtr = yBorderReverse;
+
+    //Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)
+    EB_MEMSET(above_ref, 127, (bwidth << 1) + 1);
+    EB_MEMSET(left_ref, 129, (bheight << 1) + 1);
+
+
+    
+    // Get the upper left sample
+    if (srcOriginX != 0 && srcOriginY != 0) {
+
+        readPtr = srcPtr - stride - 1;
+        *above_ref = *readPtr;
+        *left_ref = *readPtr;
+        left_ref++;
+        above_ref++;
+    }
+    else {
+        *above_ref = *left_ref = 128;
+        left_ref++;
+        above_ref++;
+    }
+
+
+    // Get the left-column
+    count = blockSizeHalf;
+
+    if (srcOriginX != 0) {
+
+        readPtr = srcPtr - 1;
+        count = ((srcOriginY + count) > height) ? count - ((srcOriginY + count) - height) : count;
+
+        for (idx = 0; idx < count; ++idx) {
+
+            *left_ref = *readPtr;
+            readPtr += stride;
+            left_ref++;
+        }
+
+        left_ref += (blockSizeHalf - count);
+
+    }
+    else {
+
+        left_ref += count;
+    }
+
+
+    // Get the top-row
+    count = blockSizeHalf;
+    if (srcOriginY != 0) {
+
+        readPtr = srcPtr - stride;
+
+        count = ((srcOriginX + count) > width) ? count - ((srcOriginX + count) - width) : count;
+        EB_MEMCPY(above_ref, readPtr, count);
+        above_ref += (blockSizeHalf - count);
+
+    }
+    else {
+
+        above_ref += count;
+    }
+
+
+    return return_error;
+}
+/** IntraPredictionOpenLoop()
+        performs Open-loop Intra candidate Search for a CU
+ */
+EbErrorType intra_prediction_open_loop(
+        uint8_t                          ois_intra_mode,
+        uint32_t                         srcOriginX,
+        uint32_t                         srcOriginY,
+        BlockGeom                       *blk_geom,
+        uint8_t                         *above_row,
+        uint8_t                         *left_col,
+        MotionEstimationContext_t       *context_ptr,                  // input parameter, ME context
+        EbAsm                            asm_type)
+{
+    EbErrorType                return_error = EB_ErrorNone;
+
+
+    int32_t p_angle = 0;
+    PredictionMode mode = ois_intra_mode;
+    int32_t angle_delta = 0;
+    const int32_t is_dr_mode = av1_is_directional_mode(mode);
+    p_angle = mode_to_angle_map[mode] + angle_delta * ANGLE_STEP;
+
+    uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
+    uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
+
+    if (is_dr_mode) {
+        dr_predictor(dst, dst_stride, blk_geom->txsize[0], above_row, left_col, 0, 0, p_angle);         
+    }
+    else {
+        // predict
+        if (mode == DC_PRED) {
+            dc_pred[srcOriginX > 0][srcOriginY > 0][blk_geom->txsize[0]](dst, dst_stride, above_row, left_col);
+           //   dc_pred_c[srcOriginX > 0][srcOriginY > 0]( dst,  dst_stride, blk_geom->bwidth , blk_geom->bheight ,above_row, left_col);        
+        } else {
+            pred[mode][blk_geom->txsize[0]](dst, dst_stride, above_row, left_col);
+        }
+    }
+    return return_error;
+}
+#endif

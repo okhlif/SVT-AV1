@@ -564,8 +564,18 @@ void* MotionEstimationKernel(void *input_ptr)
                     sb_origin_y = yLcuIndex * sequence_control_set_ptr->sb_sz;
 
                     sb_index = (uint16_t)(xLcuIndex + yLcuIndex * picture_width_in_sb);
+#if OMARK
+                   if (1)
+                        
+                        open_loop_intra_search_lcu(
+                            picture_control_set_ptr,
+                            sb_index,
+                            context_ptr,
+                            inputPicturePtr,
+                            asm_type);
 
-
+                    else
+#endif
                     OpenLoopIntraSearchLcu(
                         picture_control_set_ptr,
                         sb_index,
@@ -651,7 +661,11 @@ void* MotionEstimationKernel(void *input_ptr)
                                     picture_control_set_ptr->ois_cu32_cu16_results[sb_index]->sorted_ois_candidate[2][bestOisCuIndex].distortion +
                                     picture_control_set_ptr->ois_cu32_cu16_results[sb_index]->sorted_ois_candidate[3][bestOisCuIndex].distortion +
                                     picture_control_set_ptr->ois_cu32_cu16_results[sb_index]->sorted_ois_candidate[4][bestOisCuIndex].distortion)) >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) ;
+#if  OIS_TO_BE_UPDATED
+                            
+                            intra_sad_interval_index = (uint32_t) ( picture_control_set_ptr->ois_sb_results[sb_index]->sorted_ois_candidate[0][0].distortion  >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) ;
 
+#endif
                             intra_sad_interval_index = (uint16_t)(intra_sad_interval_index >> 2);
                             if (intra_sad_interval_index > (NUMBER_OF_SAD_INTERVALS >> 1) - 1) {
                                 uint32_t sadIntervalIndexTemp = intra_sad_interval_index - ((NUMBER_OF_SAD_INTERVALS >> 1) - 1);
@@ -699,7 +713,10 @@ void* MotionEstimationKernel(void *input_ptr)
                                     picture_control_set_ptr->ois_cu32_cu16_results[sb_index]->sorted_ois_candidate[2][bestOisCuIndex].distortion +
                                     picture_control_set_ptr->ois_cu32_cu16_results[sb_index]->sorted_ois_candidate[3][bestOisCuIndex].distortion +
                                     picture_control_set_ptr->ois_cu32_cu16_results[sb_index]->sorted_ois_candidate[4][bestOisCuIndex].distortion)) >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) ;
-
+#if OIS_TO_BE_UPDATED
+                            
+                            intra_sad_interval_index = (uint32_t) ( picture_control_set_ptr->ois_sb_results[sb_index]->sorted_ois_candidate[0][0].distortion  >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) ;
+#endif
                             intra_sad_interval_index = (uint16_t)(intra_sad_interval_index >> 2);
                             if (intra_sad_interval_index > (NUMBER_OF_SAD_INTERVALS >> 1) - 1) {
                                 uint32_t sadIntervalIndexTemp = intra_sad_interval_index - ((NUMBER_OF_SAD_INTERVALS >> 1) - 1);

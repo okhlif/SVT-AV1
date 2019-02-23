@@ -39,6 +39,9 @@ extern "C" {
 #define MAX_CU_COST (0xFFFFFFFFFFFFFFFFull >> 1)
 #define MAX_MODE_COST ( 13616969489728 * 8) // RDCOST(6544618, 128 * 128 * 255 * 255, 128 * 128 * 255 * 255) * 8;
 #define INVALID_FAST_CANDIDATE_INDEX    ~0
+#if OMARK
+#define MAX_OIS_CANDIDATES  12  //18//18
+#endif
 #define MAX_OPEN_LOOP_INTRA_CANDIDATES  18//18
 
     static const uint32_t intra_hev_cmode_to_intra_av1_mode[35] = {
@@ -304,6 +307,27 @@ extern "C" {
         uint8_t                    *neigh_top_recon[3];
         uint32_t                    best_d1_blk;
     } CodingUnit_t;
+#if OMARK
+
+        typedef struct ois_candidate_s {
+        union {
+            struct {
+                unsigned distortion : 20;
+                unsigned valid_distortion : 1;
+                unsigned : 3;
+                unsigned intra_mode : 8;
+            };
+            uint32_t ois_results;
+        };
+    } ois_candidate_t;
+
+    typedef struct ois_sb_results_s
+    {
+        uint8_t             total_intra_luma_mode[CU_MAX_COUNT];
+        ois_candidate_t*    sorted_ois_candidate[CU_MAX_COUNT];
+    } ois_sb_results_t;
+#endif
+
     typedef struct OisCandidate_s {
         union {
             struct {

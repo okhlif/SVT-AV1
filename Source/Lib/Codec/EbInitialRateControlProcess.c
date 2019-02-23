@@ -1386,7 +1386,15 @@ void QpmGatherStatisticsSW(
                     }
                 }
 
+#if OIS_TO_BE_UPDATED
 
+
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];
+	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[mdScanCuIndex];
+            oisSad = OisCuPtr[0].distortion;
+
+#endif
 
                 meSad = picture_control_set_ptr->me_results[sb_index][rasterScanCuIndex].distortionDirection[0].distortion;
 
@@ -1419,7 +1427,15 @@ void QpmGatherStatisticsSW(
             OisCu32Cu16Results_t            *oisCu32Cu16ResultsPtr = picture_control_set_ptr->ois_cu32_cu16_results[sb_index];
 
             oisSad = oisCu32Cu16ResultsPtr->sorted_ois_candidate[rasterScanCuIndex][0].distortion;
+#if OIS_TO_BE_UPDATED
+            
+            mdScanCuIndex = RASTER_SCAN_TO_MD_SCAN[rasterScanCuIndex];
 
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[mdScanCuIndex];
+            oisSad = OisCuPtr[0].distortion;
+
+#endif
             meSad = picture_control_set_ptr->me_results[sb_index][rasterScanCuIndex].distortionDirection[0].distortion;
 
             //Keep track of the min,max and sum.
@@ -1443,7 +1459,14 @@ void QpmGatherStatisticsSW(
 
             OisCu32Cu16Results_t            *oisCu32Cu16ResultsPtr = picture_control_set_ptr->ois_cu32_cu16_results[sb_index];
             oisSad = oisCu32Cu16ResultsPtr->sorted_ois_candidate[rasterScanCuIndex][0].distortion;
+#if OIS_TO_BE_UPDATED
+             mdScanCuIndex = RASTER_SCAN_TO_MD_SCAN[rasterScanCuIndex];
 
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[mdScanCuIndex];
+            oisSad = OisCuPtr[0].distortion;
+
+#endif
 
             meSad = picture_control_set_ptr->me_results[sb_index][rasterScanCuIndex].distortionDirection[0].distortion;
 
@@ -1473,7 +1496,14 @@ void QpmGatherStatisticsSW(
             oisCu32Cu16ResultsPtr->sorted_ois_candidate[2][0].distortion +
             oisCu32Cu16ResultsPtr->sorted_ois_candidate[3][0].distortion +
             oisCu32Cu16ResultsPtr->sorted_ois_candidate[4][0].distortion;
+#if OIS_TO_BE_UPDATED
+            mdScanCuIndex = 0;
 
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];	
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[mdScanCuIndex];
+            oisSad = OisCuPtr[0].distortion;
+
+#endif
 
         meSad = picture_control_set_ptr->me_results[sb_index][RASTER_SCAN_CU_INDEX_64x64].distortionDirection[0].distortion;
 

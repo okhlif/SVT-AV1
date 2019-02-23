@@ -7778,6 +7778,18 @@ int32_t GetInterIntraSadDistance(
     return (stage1SadArray[0] ? (sadDiff / (int32_t)stage1SadArray[0]) : 0);
 
 }
+#if OMARK
+void init_valid_distortion(
+    ois_candidate_t * oisCuPtr
+)
+{
+    uint8_t intraCandidateIndex;
+    for (intraCandidateIndex = 0; intraCandidateIndex < MAX_OIS_CANDIDATES; intraCandidateIndex++) {
+        oisCuPtr[intraCandidateIndex].valid_distortion = EB_FALSE;
+    }
+    return;
+}
+#endif
 
 void InitValidDistortion(
     OisCandidate_t * oisCuPtr
@@ -7820,6 +7832,38 @@ EB_IOS_POINT GetOisPoint(
 
     return oisPoint;
 }
+
+#if OMARK
+EbErrorType sort_ois_candidate_open_loop(
+
+    ois_candidate_t                 *oisCandidate, uint8_t ois_intra_count)   // input OIS candidate array
+
+{
+    EbErrorType                return_error = EB_ErrorNone;
+    uint32_t   index1;
+    uint32_t   index2;
+    uint32_t   intraCandidateMode;
+    uint64_t   intraSadDistortion;
+
+    for (index1 = 0; index1 < ois_intra_count; ++index1)
+    {
+        for (index2 = index1; index2 < ois_intra_count; ++index2)
+        {
+            if (oisCandidate[index1].distortion > oisCandidate[index2].distortion)
+            {
+                intraCandidateMode = oisCandidate[index1].intra_mode;
+                oisCandidate[index1].intra_mode = oisCandidate[index2].intra_mode;
+                oisCandidate[index2].intra_mode = intraCandidateMode;
+
+                intraSadDistortion = oisCandidate[index1].distortion;
+                oisCandidate[index1].distortion = oisCandidate[index2].distortion;
+                oisCandidate[index2].distortion = (uint32_t)intraSadDistortion;
+            }
+        }
+    }
+    return return_error;
+}
+#endif
 
 EbErrorType SortOisCandidateOpenLoop(
     OisCandidate_t                 *oisCandidate)   // input OIS candidate array
@@ -8360,7 +8404,147 @@ EbErrorType OpenLoopIntraSearchLcu(
     return return_error;
 }
 
+#if OMARK
+EbErrorType open_loop_intra_search_lcu(
+    PictureParentControlSet_t   *picture_control_set_ptr,
+    uint32_t                       sb_index,
+    MotionEstimationContext_t   *context_ptr,
+    EbPictureBufferDesc_t       *input_ptr,
+    EbAsm                       asm_type)
+{
+    EbErrorType return_error = EB_ErrorNone;
+    SequenceControlSet_t    *sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
+    uint32_t                   rasterScanCuIndex;
+    uint32_t                   meSad = 0xFFFFFFFF;
+    uint8_t                    stage1NumOfModes = 0;
+    int32_t                   interIntraSadDistance = 0;
+    uint32_t                     cu_origin_x;
+    uint32_t                   cu_origin_y;
+    uint32_t                   cu_size;
+    uint32_t                   cu_depth;
+    uint32_t                     stage1SadArray[11] = { 0 };
+    uint32_t                     openLoopIntraCandidateIndex;
+    uint32_t                     sadDistortion;
+    uint32_t                     intraCandidateIndex;
+    uint32_t                   bestMode = EB_INTRA_PLANAR;
+
+    SbParams_t             *sb_params = &sequence_control_set_ptr->sb_params_array[sb_index];
 
 
+    uint8_t                  next_sq;
+    ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];
+    
+        uint32_t  blk_index =  /*sequence_control_set_ptr->sb_size == BLOCK_128X128 ? 17 :*/ 0;
+
+        uint8_t    topNeighArray[64 * 2 + 1];
+        uint8_t    leftNeighArray[64 * 2 + 1];
+
+        uint8_t *above_ref = topNeighArray;
+        uint8_t *left_ref = leftNeighArray;
+
+        while (blk_index < sequence_control_set_ptr->max_block_cnt)
+        {
+            next_sq = 1;
+            
+            const  BlockGeom *  blk_geom = Get_blk_geom_mds(blk_index);
+
+            if (sequence_control_set_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index])
+
+            {
+                ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[from_1101_to_85[blk_index]];
+
+                if (blk_index != 0 && from_1101_to_85[blk_index] == 0)
+                    printf("\n\n\n\n !!!!!!!!!!!!\n!!!!!!!!!!\n!!!!! ");
+
+                // Init Valid Distortion to EB_FALSE
+                init_valid_distortion(
+                    OisCuPtr);
+
+                cu_origin_x = sb_params->origin_x + blk_geom->origin_x;
+                cu_origin_y = sb_params->origin_y + blk_geom->origin_y;
+
+                // Fill Neighbor Arrays
+                update_neighbor_samples_array_open_loop(
+                    above_ref,
+                    left_ref,
+                    context_ptr->intra_ref_ptr,
+                    input_ptr,
+                    input_ptr->strideY,
+                    cu_origin_x,
+                    cu_origin_y,
+                    blk_geom->bwidth,
+                    blk_geom->bheight);
+
+               // uint8_t *above_row = topNeighArray  + 1;
+               // uint8_t *left_col  = leftNeighArray + 1;
+
+                uint8_t * above_row;
+                uint8_t * left_col;
+                
+                DECLARE_ALIGNED(16, uint8_t, left_data[MAX_TX_SIZE * 2 + 32]);
+                DECLARE_ALIGNED(16, uint8_t, above_data[MAX_TX_SIZE * 2 + 32]);
+                above_row = above_data + 16;
+                left_col = left_data + 16;
+                
+                memcpy(above_row, topNeighArray  + 1, 64 * 2 );
+                memcpy(left_col, leftNeighArray + 1, 64 * 2 );
+                
+                above_row[-1] =  left_col [-1] = topNeighArray[0];
+
+                uint8_t ois_intra_mode;
+                uint8_t ois_intra_counter = 0 ;
+                uint8_t ois_intra_count = 0 ;
+
+                uint8_t intra_mode_start = DC_PRED;
+                uint8_t intra_mode_end   = SMOOTH_H_PRED;
+
+                for (ois_intra_mode = intra_mode_start; ois_intra_mode < intra_mode_end; ++ois_intra_mode) {              
+                    
+                    ois_intra_count ++ ;
+
+                    // PRED
+                    intra_prediction_open_loop(
+                        ois_intra_mode,
+                        cu_origin_x,
+                        cu_origin_y,
+                        blk_geom,
+                        above_row,
+                        left_col,
+                        context_ptr,
+                        asm_type);
+
+                    //Distortion
+                    OisCuPtr[ois_intra_mode].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
+                        &(input_ptr->bufferY[(input_ptr->origin_y + cu_origin_y) * input_ptr->strideY + (input_ptr->origin_x + cu_origin_x)]),
+                        input_ptr->strideY,
+                        &(context_ptr->me_context_ptr->sb_buffer[0]),
+                        BLOCK_SIZE_64,
+                        blk_geom->bwidth,
+                        blk_geom->bheight);
+
+                    
+                    OisCuPtr[ois_intra_mode].intra_mode = ois_intra_mode;
+                    OisCuPtr[ois_intra_mode].valid_distortion = EB_TRUE;
+
+                }
+
+                sort_ois_candidate_open_loop(OisCuPtr,ois_intra_count);
+
+                if (blk_geom->sq_size > 8)
+                {
+                    next_sq = 1;
+                }
+                else {
+                    next_sq = 0;
+                }
+            }
+            blk_index += next_sq ? d1_depth_offset[sequence_control_set_ptr->sb_size == BLOCK_128X128][blk_geom->depth] : ns_depth_offset[sequence_control_set_ptr->sb_size == BLOCK_128X128][blk_geom->depth];
+
+        }
+
+
+    return return_error;
+}
+#endif
 
 

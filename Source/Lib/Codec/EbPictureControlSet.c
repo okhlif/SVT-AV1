@@ -973,6 +973,27 @@ EbErrorType PictureParentControlSetCtor(
 #else
     uint32_t maxOisCand = initDataPtr->enc_mode <= ENC_M1 || initDataPtr->speed_control ? MAX_OPEN_LOOP_INTRA_CANDIDATES : 9;
 #endif
+
+    
+#if OMARK
+        EB_MALLOC(ois_sb_results_t**, objectPtr->ois_sb_results, sizeof(ois_sb_results_t*) * objectPtr->sb_total_count, EB_N_PTR);
+        
+    for (sb_index = 0; sb_index < objectPtr->sb_total_count; ++sb_index) {
+
+        EB_MALLOC(ois_sb_results_t*, objectPtr->ois_sb_results[sb_index], sizeof(ois_sb_results_t), EB_N_PTR);
+
+        ois_candidate_t* contigousCand;
+        EB_MALLOC(ois_candidate_t*, contigousCand, sizeof(ois_candidate_t) * MAX_OIS_CANDIDATES * CU_MAX_COUNT, EB_N_PTR);
+
+        uint32_t cuIdx;
+        for (cuIdx = 0; cuIdx < CU_MAX_COUNT; ++cuIdx) {
+            objectPtr->ois_sb_results[sb_index]->sorted_ois_candidate[cuIdx] = &contigousCand[cuIdx*MAX_OIS_CANDIDATES];
+        }
+    }
+
+#endif
+
+
     EB_MALLOC(OisCu32Cu16Results_t**, objectPtr->ois_cu32_cu16_results, sizeof(OisCu32Cu16Results_t*) * objectPtr->sb_total_count, EB_N_PTR);
 
     for (sb_index = 0; sb_index < objectPtr->sb_total_count; ++sb_index) {

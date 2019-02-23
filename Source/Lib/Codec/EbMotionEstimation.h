@@ -42,7 +42,16 @@ extern "C" {
         uint32_t                   decimStride,
         uint32_t                   decimStep);
 
+#if OMARK
+    extern EbErrorType open_loop_intra_search_lcu(
+        PictureParentControlSet_t   *picture_control_set_ptr,
+        uint32_t                       sb_index,
+        MotionEstimationContext_t   *context_ptr,
+        EbPictureBufferDesc_t       *input_ptr,
+        EbAsm                       asm_type);
 
+
+#endif
     extern EbErrorType OpenLoopIntraSearchLcu(
         PictureParentControlSet_t   *picture_control_set_ptr,
         uint32_t                       sb_index,
