@@ -7844,6 +7844,8 @@ EbErrorType sort_ois_candidate_open_loop(
     uint32_t   index2;
     uint32_t   intraCandidateMode;
     uint64_t   intraSadDistortion;
+    int32_t    intraCandidateAngle;
+    uint32_t   intraCandidateValidDistrotion;
 
     for (index1 = 0; index1 < ois_intra_count; ++index1)
     {
@@ -7858,6 +7860,14 @@ EbErrorType sort_ois_candidate_open_loop(
                 intraSadDistortion = oisCandidate[index1].distortion;
                 oisCandidate[index1].distortion = oisCandidate[index2].distortion;
                 oisCandidate[index2].distortion = (uint32_t)intraSadDistortion;
+
+                intraCandidateAngle = oisCandidate[index1].angle_delta;
+                oisCandidate[index1].angle_delta = oisCandidate[index2].angle_delta;
+                oisCandidate[index2].angle_delta = intraCandidateAngle;
+
+                intraCandidateValidDistrotion = oisCandidate[index1].valid_distortion;
+                oisCandidate[index1].valid_distortion = oisCandidate[index2].valid_distortion;
+                oisCandidate[index2].valid_distortion = intraCandidateValidDistrotion;
             }
         }
     }
@@ -8492,43 +8502,88 @@ EbErrorType open_loop_intra_search_lcu(
                 above_row[-1] =  left_col [-1] = topNeighArray[0];
 
                 uint8_t ois_intra_mode;
-                uint8_t ois_intra_counter = 0 ;
                 uint8_t ois_intra_count = 0 ;
 
                 uint8_t intra_mode_start = DC_PRED;
-                uint8_t intra_mode_end   = SMOOTH_H_PRED;
+                uint8_t intra_mode_end   = SMOOTH_H_PRED+1;
 
+                EbBool use_angle_delta = (blk_geom->bsize >= BLOCK_8X8);
+                uint8_t angleDeltaCandidateCount = 1;// use_angle_delta ? 7 : 1;
+                
+
+                uint8_t disable_z2_prediction   = (blk_geom->sq_size > 16 ) ? 1 : 0;
+
+                uint8_t angleDeltaCounter = 0;
                 for (ois_intra_mode = intra_mode_start; ois_intra_mode < intra_mode_end; ++ois_intra_mode) {              
-                    
-                    ois_intra_count ++ ;
+                    if (av1_is_directional_mode((PredictionMode)ois_intra_mode)) {
 
-                    // PRED
-                    intra_prediction_open_loop(
-                        ois_intra_mode,
-                        cu_origin_x,
-                        cu_origin_y,
-                        blk_geom,
-                        above_row,
-                        left_col,
-                        context_ptr,
-                        asm_type);
 
-                    //Distortion
-                    OisCuPtr[ois_intra_mode].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
-                        &(input_ptr->bufferY[(input_ptr->origin_y + cu_origin_y) * input_ptr->strideY + (input_ptr->origin_x + cu_origin_x)]),
-                        input_ptr->strideY,
-                        &(context_ptr->me_context_ptr->sb_buffer[0]),
-                        BLOCK_SIZE_64,
-                        blk_geom->bwidth,
-                        blk_geom->bheight);
+                        for (angleDeltaCounter = 0; angleDeltaCounter < angleDeltaCandidateCount; ++angleDeltaCounter) {
+                            int32_t angle_delta = angleDeltaCandidateCount == 1 ? 0 : angleDeltaCounter - (angleDeltaCandidateCount >> 1);
+                            int32_t  p_angle = mode_to_angle_map[(PredictionMode)ois_intra_mode] + angle_delta * ANGLE_STEP;
+                            if (!disable_z2_prediction || (p_angle <= 90 || p_angle >= 180)) {
 
-                    
-                    OisCuPtr[ois_intra_mode].intra_mode = ois_intra_mode;
-                    OisCuPtr[ois_intra_mode].valid_distortion = EB_TRUE;
+                                // PRED
+                                intra_prediction_open_loop(
+                                    p_angle,
+                                    ois_intra_mode,
+                                    cu_origin_x,
+                                    cu_origin_y,
+                                    blk_geom,
+                                    above_row,
+                                    left_col,
+                                    context_ptr,
+                                    asm_type);
 
+                                //Distortion
+                                OisCuPtr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
+                                    &(input_ptr->bufferY[(input_ptr->origin_y + cu_origin_y) * input_ptr->strideY + (input_ptr->origin_x + cu_origin_x)]),
+                                    input_ptr->strideY,
+                                    &(context_ptr->me_context_ptr->sb_buffer[0]),
+                                    BLOCK_SIZE_64,
+                                    blk_geom->bwidth,
+                                    blk_geom->bheight);
+
+                                OisCuPtr[ois_intra_count].intra_mode = ois_intra_mode;
+                                OisCuPtr[ois_intra_count].valid_distortion = EB_TRUE;
+                                OisCuPtr[ois_intra_count++].angle_delta = angle_delta;
+                            }
+
+                        }
+
+                        
+                    }
+                    else {
+                        // PRED
+                            intra_prediction_open_loop(
+                                 0 ,
+                                ois_intra_mode,
+                                cu_origin_x,
+                                cu_origin_y,
+                                blk_geom,
+                                above_row,
+                                left_col,
+                                context_ptr,
+                                asm_type);
+
+                            //Distortion
+                            OisCuPtr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
+                                &(input_ptr->bufferY[(input_ptr->origin_y + cu_origin_y) * input_ptr->strideY + (input_ptr->origin_x + cu_origin_x)]),
+                                input_ptr->strideY,
+                                &(context_ptr->me_context_ptr->sb_buffer[0]),
+                                BLOCK_SIZE_64,
+                                blk_geom->bwidth,
+                                blk_geom->bheight);
+
+                            OisCuPtr[ois_intra_count].intra_mode = ois_intra_mode;
+                            OisCuPtr[ois_intra_count].valid_distortion = EB_TRUE;
+                            OisCuPtr[ois_intra_count++].angle_delta = 0;
+
+                    }
                 }
-
+                
                 sort_ois_candidate_open_loop(OisCuPtr,ois_intra_count);
+                ois_sb_results_ptr->total_intra_luma_mode[from_1101_to_85[blk_index]] = ois_intra_count;
 
                 if (blk_geom->sq_size > 8)
                 {

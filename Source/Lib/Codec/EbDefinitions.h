@@ -36,8 +36,8 @@ extern "C" {
 #endif
 
      //Mode definition : Only one mode should be ON at a time
-#define OMARK                   0
-#define OIS_TO_BE_UPDATED       0
+#define OMARK                  1
+#define OIS_TO_BE_UPDATED      1
 
 #define MR_MODE                                         0
 #define SHUT_FILTERING                                  0 // CDEF RESTORATION DLF

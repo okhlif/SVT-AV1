@@ -876,12 +876,21 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->intra_pred_mode = 4;
         else
             picture_control_set_ptr->intra_pred_mode = 2;
+#if OMARK
+    }else if (intra_pred_level == 2) {  
+        if (picture_control_set_ptr->slice_type == I_SLICE)
+            picture_control_set_ptr->intra_pred_mode = 3;
+        else
+            picture_control_set_ptr->intra_pred_mode = 0;
+    }
+#else
     }else if (intra_pred_level == 2) {  
         if (picture_control_set_ptr->temporal_layer_index == 0)
             picture_control_set_ptr->intra_pred_mode = 3;
         else
             picture_control_set_ptr->intra_pred_mode = 0;
     }
+#endif
     else if (intra_pred_level == 1) { 
         if (picture_control_set_ptr->temporal_layer_index == 0)
             picture_control_set_ptr->intra_pred_mode = 1;

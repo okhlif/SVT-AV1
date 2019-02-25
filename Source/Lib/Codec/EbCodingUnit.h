@@ -40,7 +40,7 @@ extern "C" {
 #define MAX_MODE_COST ( 13616969489728 * 8) // RDCOST(6544618, 128 * 128 * 255 * 255, 128 * 128 * 255 * 255) * 8;
 #define INVALID_FAST_CANDIDATE_INDEX    ~0
 #if OMARK
-#define MAX_OIS_CANDIDATES  12  //18//18
+#define MAX_OIS_CANDIDATES  60  //18//18
 #endif
 #define MAX_OPEN_LOOP_INTRA_CANDIDATES  18//18
 
@@ -319,6 +319,7 @@ extern "C" {
             };
             uint32_t ois_results;
         };
+        int32_t angle_delta;
     } ois_candidate_t;
 
     typedef struct ois_sb_results_s

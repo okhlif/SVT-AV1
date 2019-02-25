@@ -10096,10 +10096,11 @@ EbErrorType update_neighbor_samples_array_open_loop(
         performs Open-loop Intra candidate Search for a CU
  */
 EbErrorType intra_prediction_open_loop(
+     int32_t  p_angle ,
         uint8_t                          ois_intra_mode,
         uint32_t                         srcOriginX,
         uint32_t                         srcOriginY,
-        BlockGeom                       *blk_geom,
+        const  BlockGeom                *blk_geom,
         uint8_t                         *above_row,
         uint8_t                         *left_col,
         MotionEstimationContext_t       *context_ptr,                  // input parameter, ME context
@@ -10108,11 +10109,11 @@ EbErrorType intra_prediction_open_loop(
     EbErrorType                return_error = EB_ErrorNone;
 
 
-    int32_t p_angle = 0;
+//    int32_t p_angle = 0;
     PredictionMode mode = ois_intra_mode;
     int32_t angle_delta = 0;
     const int32_t is_dr_mode = av1_is_directional_mode(mode);
-    p_angle = mode_to_angle_map[mode] + angle_delta * ANGLE_STEP;
+    //p_angle = mode_to_angle_map[mode] + angle_delta * ANGLE_STEP;
 
     uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
     uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;

@@ -379,10 +379,11 @@ extern "C" {
         uint8_t                             bwidth,
         uint8_t                             bheight);
     extern EbErrorType intra_prediction_open_loop(
+         int32_t  p_angle ,
         uint8_t                          ois_intra_mode,
         uint32_t                         srcOriginX,
         uint32_t                         srcOriginY,
-        BlockGeom                       *blk_geom,
+        const  BlockGeom                *blk_geom,
         uint8_t                         *above_row,
         uint8_t                         *left_col,
         MotionEstimationContext_t       *context_ptr,                  // input parameter, ME context
