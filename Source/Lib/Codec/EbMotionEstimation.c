@@ -8508,11 +8508,17 @@ EbErrorType open_loop_intra_search_lcu(
                 uint8_t intra_mode_end   = SMOOTH_H_PRED+1;
 
                 EbBool use_angle_delta = (blk_geom->bsize >= BLOCK_8X8);
-                uint8_t angleDeltaCandidateCount = 1;// use_angle_delta ? 7 : 1;
+                uint8_t angleDeltaCandidateCount = use_angle_delta ? 7 : 1;
                 
+                
+                 //kepp track of best SAD
+                uint8_t  best_intra_ois_index;
+                uint8_t  best_intra_mode;
+                uint32_t best_intra_angle;
+                uint32_t best_intra_ois_distortion = 64*64*255;
 
-                uint8_t disable_z2_prediction   = (blk_geom->sq_size > 16 ) ? 1 : 0;
-
+                //uint8_t disable_z2_prediction   = (blk_geom->sq_size > 16 ) ? 1 : 0;
+                //
                 uint8_t angleDeltaCounter = 0;
                 for (ois_intra_mode = intra_mode_start; ois_intra_mode < intra_mode_end; ++ois_intra_mode) {              
                     if (av1_is_directional_mode((PredictionMode)ois_intra_mode)) {
@@ -8521,7 +8527,7 @@ EbErrorType open_loop_intra_search_lcu(
                         for (angleDeltaCounter = 0; angleDeltaCounter < angleDeltaCandidateCount; ++angleDeltaCounter) {
                             int32_t angle_delta = angleDeltaCandidateCount == 1 ? 0 : angleDeltaCounter - (angleDeltaCandidateCount >> 1);
                             int32_t  p_angle = mode_to_angle_map[(PredictionMode)ois_intra_mode] + angle_delta * ANGLE_STEP;
-                            if (!disable_z2_prediction || (p_angle <= 90 || p_angle >= 180)) {
+                            //if (!disable_z2_prediction || (p_angle <= 90 || p_angle >= 180)) {
 
                                 // PRED
                                 intra_prediction_open_loop(
@@ -8543,12 +8549,28 @@ EbErrorType open_loop_intra_search_lcu(
                                     BLOCK_SIZE_64,
                                     blk_geom->bwidth,
                                     blk_geom->bheight);
-
-                                OisCuPtr[ois_intra_count].intra_mode = ois_intra_mode;
+                                
                                 OisCuPtr[ois_intra_count].valid_distortion = EB_TRUE;
-                                OisCuPtr[ois_intra_count++].angle_delta = angle_delta;
-                            }
+                                OisCuPtr[ois_intra_count].intra_mode = ois_intra_mode;
+                                OisCuPtr[ois_intra_count].angle_delta = angle_delta;
+                                
+                                //kepp track of best SAD
+                                if (OisCuPtr[ois_intra_count].distortion < best_intra_ois_distortion) {
+                                    best_intra_ois_distortion   = OisCuPtr[ois_intra_count].distortion;
+                                    best_intra_mode             = OisCuPtr[ois_intra_count].intra_mode;
+                                    best_intra_angle            = OisCuPtr[ois_intra_count].angle_delta;
 
+
+                                    OisCuPtr[ois_intra_count].distortion      = OisCuPtr[0].distortion;
+                                    OisCuPtr[ois_intra_count].intra_mode      = OisCuPtr[0].intra_mode;
+                                    OisCuPtr[ois_intra_count].angle_delta     = OisCuPtr[0].angle_delta;
+
+                                    OisCuPtr[0].distortion      = best_intra_ois_distortion;
+                                    OisCuPtr[0].intra_mode      = best_intra_mode ;          
+                                    OisCuPtr[0].angle_delta     = best_intra_angle ;    
+
+                                }
+                                ois_intra_count++;
                         }
 
                         
@@ -8575,14 +8597,33 @@ EbErrorType open_loop_intra_search_lcu(
                                 blk_geom->bwidth,
                                 blk_geom->bheight);
 
-                            OisCuPtr[ois_intra_count].intra_mode = ois_intra_mode;
+                            
                             OisCuPtr[ois_intra_count].valid_distortion = EB_TRUE;
-                            OisCuPtr[ois_intra_count++].angle_delta = 0;
+                            OisCuPtr[ois_intra_count].intra_mode = ois_intra_mode;
+                            OisCuPtr[ois_intra_count].angle_delta = 0;
+                                
+                            //kepp track of best SAD
+                            if (OisCuPtr[ois_intra_count].distortion < best_intra_ois_distortion) {
+                                best_intra_ois_distortion   = OisCuPtr[ois_intra_count].distortion;
+                                best_intra_mode             = OisCuPtr[ois_intra_count].intra_mode;
+                                best_intra_angle            = OisCuPtr[ois_intra_count].angle_delta;
+
+
+                                OisCuPtr[ois_intra_count].distortion      = OisCuPtr[0].distortion;
+                                OisCuPtr[ois_intra_count].intra_mode      = OisCuPtr[0].intra_mode;
+                                OisCuPtr[ois_intra_count].angle_delta     = OisCuPtr[0].angle_delta;
+
+                                OisCuPtr[0].distortion      = best_intra_ois_distortion;
+                                OisCuPtr[0].intra_mode      = best_intra_mode ;          
+                                OisCuPtr[0].angle_delta     = best_intra_angle ;    
+                            }
+                            ois_intra_count++;
+                            
 
                     }
                 }
                 
-                sort_ois_candidate_open_loop(OisCuPtr,ois_intra_count);
+               // sort_ois_candidate_open_loop(OisCuPtr,ois_intra_count);
                 ois_sb_results_ptr->total_intra_luma_mode[from_1101_to_85[blk_index]] = ois_intra_count;
 
                 if (blk_geom->sq_size > 8)
