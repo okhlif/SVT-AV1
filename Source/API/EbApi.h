@@ -25,7 +25,7 @@ extern "C" {
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT         2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT            2
 
-#define MAX_ENC_PRESET                              4
+#define MAX_ENC_PRESET                              7
 
 #ifdef _WIN32
 #define EB_API __declspec(dllexport)
@@ -105,6 +105,7 @@ EbBool is a 32 bit quantity and is aligned on a 32 bit word boundary.
 
 #define EB_BUFFERFLAG_EOS           0x00000001  // signals the last packet of the stream
 #define EB_BUFFERFLAG_SHOW_EXT      0x00000002  // signals that the packet contains a show existing frame at the end
+#define EB_BUFFERFLAG_HAS_TD        0x00000004  // signals that the packet contains a show existing frame at the end
 
 #if TILES
 #define EB_BUFFERFLAG_TG            0x00000004  // signals that the packet contains Tile Group header
@@ -488,7 +489,23 @@ typedef struct EbSvtAv1EncConfiguration
     *
     * Default is 60. */
     int32_t                  injector_frame_rate;
-    EbBool                   use_round_robin_thread_assignment;
+
+    // Threads management
+
+    /* The number of logical processor which encoder threads run on. If
+     * LogicalProcessorNumber and TargetSocket are not set, threads are managed by
+     * OS thread scheduler. */
+    uint32_t                logical_processors;
+
+    /* Target socket to run on. For dual socket systems, this can specify which
+     * socket the encoder runs on.
+     *
+     * -1 = Both Sockets.
+     *  0 = Socket 0.
+     *  1 = Socket 1.
+     *
+     * Default is -1. */
+    int32_t                 target_socket;
 
     // Debug tools
 

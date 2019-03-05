@@ -41,24 +41,20 @@ extern "C" {
 #define SHUT_FILTERING                                  0 // CDEF RESTORATION DLF
     ////
 #define MEM_RED4                                        1 //  Reduce mem allocation when DISABLE_128X128_SB is ON
-
-#define FILT_PROC      1    // New Filtering processes.
-#define CDEF_M        1 // multi-threaded cdef
-#define REST_M        1 // multi-threaded restoration
-#define REST_NEED_B   1 // use boundary update in restoration
+#define FILT_PROC                                       1    // New Filtering processes.
+#define CDEF_M                                          1 // multi-threaded cdef
+#define REST_M                                          1 // multi-threaded restoration
+#define REST_NEED_B                                     1 // use boundary update in restoration
 #define NEW_PRED_STRUCT                                 1 // Ability to run 5-layer prediction structure. By Default 5L is used
-#define  TILES     1
+#define TILES                                           1
 
-#define INTRA_CORE_OPT                                  1
-
-#define ENCODER_MODE_CLEANUP                            1                                          
-
+#define INTRA_CORE_OPT                                  0
 #define ENABLE_INTRA_4x4                                1 //
 #define DISABLE_NSQ                                     1 //
 #define DISABLE_128X128_SB                              0
 #define ENABLE_INTER_4x4                                0 // optional
 #define DISABLE_4xN_Nx4                                 1 //
-#define DISABLE_128x128                                 0 //
+#define DISABLE_128x128                                 0
 #define VCI_CANDIDATE_II                                1
 
 #if VCI_CANDIDATE_II
@@ -84,7 +80,6 @@ extern "C" {
 #define SUPPORT_10BIT                                   1 // Support for 10 Bit encodings
 #define NEW_QPS                                         1 // New QPS based on AOM 1Pass
 #define ME_HME_OQ                                       1 // Ported ME HME from EB32 OQ
-
 #if SUPPORT_10BIT
 #define INTRA_10BIT_SUPPORT                             1
 #define QT_10BIT_SUPPORT                                1
@@ -94,7 +89,6 @@ extern "C" {
 #define LF_10BIT_FIX                                    1
 #define INTERPOL_FILTER_SEARCH_10BIT_SUPPORT            1
 #endif
-
 #define BUG_FIX                                         1 // BUG fix related to transform type
 #define LIMIT_INTRA_INJ                                 1
 #define TURN_OFF_INTERPOL_FILTER_SEARCH                 1
@@ -109,7 +103,7 @@ extern "C" {
 
 // NEW MACOS
 #define INTRINSIC_OPT_2                                 1 // Intrinsics opt work phase 2
-#define DIS_EDGE_FIL                                    1 // disable intra edge filter - to be removed after fixing the neigbor array for intra 4xN and Nx4
+#define DIS_EDGE_FIL                                    0 // disable intra edge filter - to be removed after fixing the neigbor array for intra 4xN and Nx4
 #define DISABLE_INTRA_PRED_INTRINSIC                    0 // To be used to switch between intrinsic and C code for intra-pred
 #define USE_INLOOP_ME_FULL_SAD                          0 // To switch between full SAD and subsampled-SAD for in-loop-me subpel.
 #define NO_SUBPEL_FOR_128X128                           1 // Intrinsic is not available for 128x128 Subpel
@@ -142,14 +136,34 @@ extern "C" {
 #define FAST_CDEF                                       1
 #define FAST_SG                                         1
 #define FAST_WN                                         1
-#define TX_SEARCH_LEVELS                                1 
-#define INTERPOLATION_SEARCH_LEVELS                     1 
-#define NSQ_SEARCH_LEVELS                               1
-
 #define CHROMA_BLIND                                    1 // Added the ability to switch between three chroma modes: 1. chroma @ MD, 2. chroma blind @ MD + CFL @ EP. 3. chroma blind @ MD + no CFL @ EP
+#define CONTENT_BASED_QPS                               1 // Adaptive QP Scaling (active for I only)
+#define ADAPTIVE_DEPTH_PARTITIONING                     1 // Added the ability to switch @ SB basis between: (1) all square up to 64x64,  (2) mdc up to 64x64, (3) mdc up to 64x64 only pred, (4) mdc up to 64x64 only pred + 1 NFL
+#if ADAPTIVE_DEPTH_PARTITIONING
+#define ADP_V1                                          0      
+#define ADP_STATS_PER_LAYER                             0
+#define OPEN_LOOP_EARLY_PARTITION                       1
+#if OPEN_LOOP_EARLY_PARTITION
+#define REST_FAST_RATE_EST                              1
+#define MDC_FIX_0                                       1
+#define MDC_FIX_1                                       1
+#endif
+#endif
 
-#define TUNED_SETTINGS_FOR_M0                           1
-#define TUNED_SETTINGS_FOR_M1                           1
+#define REMOVED_DUPLICATE_INTER                         1
+#define REMOVED_DUPLICATE_INTER_L1                      1
+#define REMOVED_DUPLICATE_INTER_BIPRED                  1
+
+#define USED_NFL_FEATURE_BASED                          1
+#if USED_NFL_FEATURE_BASED
+#define NFL_TX_TH                                      12 // To be tuned
+#define NFL_IT_TH                                       2 // To be tuned
+#endif
+
+#define ENABLE_PAETH                                    1
+#define TWO_FAST_LOOP                                   1
+#define ENABLE_EOB_ZERO_CHECK                           1
+#define DISABLE_128_SB_FOR_SUB_720                      1
 
 /********************************************************/
 /****************** Pre-defined Values ******************/
@@ -486,24 +500,19 @@ typedef struct InterpFilterParams {
     InterpFilter interp_filter;
 } InterpFilterParams;
 
-#if TX_SEARCH_LEVELS
 typedef enum TX_SEARCH_LEVEL {
     TX_SEARCH_OFF,
     TX_SEARCH_ENC_DEC,
     TX_SEARCH_INTER_DEPTH,
     TX_SEARCH_FULL_LOOP
 } TX_SEARCH_LEVEL;
-#endif
 
-#if INTERPOLATION_SEARCH_LEVELS
 typedef enum INTERPOLATION_SEARCH_LEVEL {
     IT_SEARCH_OFF,
     IT_SEARCH_INTER_DEPTH,
     IT_SEARCH_FULL_LOOP,
     IT_SEARCH_FAST_LOOP,
 } INTERPOLATION_SEARCH_LEVEL;
-#endif
-#if NSQ_SEARCH_LEVELS
 typedef enum NSQ_SEARCH_LEVEL {
     NSQ_SEARCH_OFF,
     NSQ_SEARCH_BASE_ON_SQ_TYPE,
@@ -512,10 +521,7 @@ typedef enum NSQ_SEARCH_LEVEL {
     NSQ_INTER_SEARCH_BASE_ON_SQ_INTRAMODE,
     NSQ_SEARCH_FULL
 } NSQ_SEARCH_LEVEL;
-#endif
-#if NSQ_SEARCH_LEVELS
 #define MAX_PARENT_SQ     6
-#endif
 typedef enum COMPOUND_DIST_WEIGHT_MODE {
     DIST,
 } COMPOUND_DIST_WEIGHT_MODE;
@@ -563,7 +569,7 @@ typedef enum ATTRIBUTE_PACKED {
     BlockSizeS = BLOCK_4X16,
     BLOCK_INVALID = 255,
     BLOCK_LARGEST = (BlockSizeS - 1)
-} BlockSize;
+} block_size;
 
 typedef enum ATTRIBUTE_PACKED {
     PARTITION_NONE,
@@ -1261,7 +1267,7 @@ typedef struct PartitionContext {
     PARTITION_CONTEXT left;
 }PartitionContext;
 // Generates 5 bit field in which each bit set to 1 represents
-// a blocksize partition  11111 means we split 128x128, 64x64, 32x32, 16x16
+// a block_size partition  11111 means we split 128x128, 64x64, 32x32, 16x16
 // and 8x8.  10000 means we just split the 128x128 to 64x64
 /* clang-format off */
 static const struct {
@@ -2024,6 +2030,7 @@ typedef enum EB_INTRA_REFRESH_TYPE {
 #define ENC_M4          4
 #define ENC_M5          5
 #define ENC_M6          6
+#define ENC_M7          7
 
 #define MAX_SUPPORTED_MODES 8
 
@@ -2084,8 +2091,8 @@ typedef enum EB_TUSIZE {
 
 static const uint8_t QP_OFFSET_WEIGHT[3][4] = { // [Slice Type][QP Offset Weight Level]
     { 9, 8, 7, 6 },
-{ 9, 8, 7, 6 },
-{ 10, 9, 8, 7 }
+    { 9, 8, 7, 6 },
+    { 10, 9, 8, 7 }
 };
 
 /** Assembly Types
@@ -2107,7 +2114,7 @@ semaphores, mutexs, etc.
 typedef void * EbHandle;
 
 /** The EB_CTOR type is used to define the eBrisk object constructors.
-objectPtr is a EbPtr to the object being constructed.
+object_ptr is a EbPtr to the object being constructed.
 object_init_data_ptr is a EbPtr to a data structure used to initialize the object.
 */
 typedef EbErrorType(*EB_CTOR)(
@@ -2115,10 +2122,10 @@ typedef EbErrorType(*EB_CTOR)(
     EbPtr object_init_data_ptr);
 
 /** The EB_DTOR type is used to define the eBrisk object destructors.
-objectPtr is a EbPtr to the object being constructed.
+object_ptr is a EbPtr to the object being constructed.
 */
 typedef void(*EB_DTOR)(
-    EbPtr objectPtr);
+    EbPtr object_ptr);
 
 #define INVALID_MV            0xFFFFFFFF
 #define BLKSIZE 64
@@ -2195,30 +2202,30 @@ extern    EbMemoryMapEntry        *appMemoryMap;            // App Memory table
 extern    uint32_t                  *appMemoryMapIndex;       // App Memory index
 extern    uint64_t                  *totalAppMemory;          // App Memory malloc'd
 
-extern    EbMemoryMapEntry        *memoryMap;               // library Memory table
-extern    uint32_t                  *memoryMapIndex;          // library memory index
-extern    uint64_t                  *totalLibMemory;          // library Memory malloc'd
+extern    EbMemoryMapEntry        *memory_map;               // library Memory table
+extern    uint32_t                  *memory_map_index;          // library memory index
+extern    uint64_t                  *total_lib_memory;          // library Memory malloc'd
 
 extern    uint32_t                   libMallocCount;
-extern    uint32_t                   libThreadCount;
+extern    uint32_t                   lib_thread_count;
 extern    uint32_t                   libSemaphoreCount;
 extern    uint32_t                   libMutexCount;
 
 extern    uint32_t                   appMallocCount;
 
-#define EB_APP_MALLOC(type, pointer, nElements, pointerClass, returnType) \
-pointer = (type)malloc(nElements); \
+#define EB_APP_MALLOC(type, pointer, n_elements, pointer_class, returnType) \
+pointer = (type)malloc(n_elements); \
 if (pointer == (type)EB_NULL){ \
     return returnType; \
     } \
     else { \
-    appMemoryMap[*(appMemoryMapIndex)].ptrType = pointerClass; \
+    appMemoryMap[*(appMemoryMapIndex)].ptrType = pointer_class; \
     appMemoryMap[(*(appMemoryMapIndex))++].ptr = pointer; \
-    if (nElements % 8 == 0) { \
-        *totalAppMemory += (nElements); \
+    if (n_elements % 8 == 0) { \
+        *totalAppMemory += (n_elements); \
             } \
             else { \
-        *totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        *totalAppMemory += ((n_elements) + (8 - ((n_elements) % 8))); \
     } \
 } \
 if (*(appMemoryMapIndex) >= MAX_APP_NUM_PTR) { \
@@ -2226,22 +2233,22 @@ if (*(appMemoryMapIndex) >= MAX_APP_NUM_PTR) { \
         } \
 appMallocCount++;
 
-#define EB_APP_MALLOC_NR(type, pointer, nElements, pointerClass,returnType) \
+#define EB_APP_MALLOC_NR(type, pointer, n_elements, pointer_class,returnType) \
 (void)returnType; \
-pointer = (type)malloc(nElements); \
+pointer = (type)malloc(n_elements); \
 if (pointer == (type)EB_NULL){ \
     returnType = EB_ErrorInsufficientResources; \
     printf("Malloc has failed due to insuffucient resources"); \
     return; \
     } \
     else { \
-    appMemoryMap[*(appMemoryMapIndex)].ptrType = pointerClass; \
+    appMemoryMap[*(appMemoryMapIndex)].ptrType = pointer_class; \
     appMemoryMap[(*(appMemoryMapIndex))++].ptr = pointer; \
-    if (nElements % 8 == 0) { \
-        *totalAppMemory += (nElements); \
+    if (n_elements % 8 == 0) { \
+        *totalAppMemory += (n_elements); \
             } \
             else { \
-        *totalAppMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        *totalAppMemory += ((n_elements) + (8 - ((n_elements) % 8))); \
     } \
 } \
 if (*(appMemoryMapIndex) >= MAX_APP_NUM_PTR) { \
@@ -2254,135 +2261,135 @@ appMallocCount++;
 #define ALVALUE 32
 
 #ifdef _MSC_VER
-#define EB_ALLIGN_MALLOC(type, pointer, nElements, pointerClass) \
-pointer = (type) _aligned_malloc(nElements,ALVALUE); \
+#define EB_ALLIGN_MALLOC(type, pointer, n_elements, pointer_class) \
+pointer = (type) _aligned_malloc(n_elements,ALVALUE); \
 if (pointer == (type)EB_NULL) { \
     return EB_ErrorInsufficientResources; \
     } \
     else { \
-    memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-    memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-    if (nElements % 8 == 0) { \
-        *totalLibMemory += (nElements); \
+    memory_map[*(memory_map_index)].ptrType = pointer_class; \
+    memory_map[(*(memory_map_index))++].ptr = pointer; \
+    if (n_elements % 8 == 0) { \
+        *total_lib_memory += (n_elements); \
     } \
     else { \
-        *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        *total_lib_memory += ((n_elements) + (8 - ((n_elements) % 8))); \
     } \
 } \
-if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
+if (*(memory_map_index) >= MAX_NUM_PTR) { \
     return EB_ErrorInsufficientResources; \
 } \
 libMallocCount++;
 
 #else
-#define EB_ALLIGN_MALLOC(type, pointer, nElements, pointerClass) \
-if (posix_memalign((void**)(&(pointer)), ALVALUE, nElements) != 0) { \
+#define EB_ALLIGN_MALLOC(type, pointer, n_elements, pointer_class) \
+if (posix_memalign((void**)(&(pointer)), ALVALUE, n_elements) != 0) { \
     return EB_ErrorInsufficientResources; \
         } \
             else { \
     pointer = (type) pointer;  \
-    memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-    memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-    if (nElements % 8 == 0) { \
-        *totalLibMemory += (nElements); \
+    memory_map[*(memory_map_index)].ptrType = pointer_class; \
+    memory_map[(*(memory_map_index))++].ptr = pointer; \
+    if (n_elements % 8 == 0) { \
+        *total_lib_memory += (n_elements); \
             } \
             else { \
-        *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        *total_lib_memory += ((n_elements) + (8 - ((n_elements) % 8))); \
     } \
 } \
-if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
+if (*(memory_map_index) >= MAX_NUM_PTR) { \
     return EB_ErrorInsufficientResources; \
     } \
 libMallocCount++;
 #endif
 
 
-#define EB_MALLOC(type, pointer, nElements, pointerClass) \
-pointer = (type) malloc(nElements); \
+#define EB_MALLOC(type, pointer, n_elements, pointer_class) \
+pointer = (type) malloc(n_elements); \
 if (pointer == (type)EB_NULL) { \
     return EB_ErrorInsufficientResources; \
     } \
     else { \
-    memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-    memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-    if (nElements % 8 == 0) { \
-        *totalLibMemory += (nElements); \
+    memory_map[*(memory_map_index)].ptrType = pointer_class; \
+    memory_map[(*(memory_map_index))++].ptr = pointer; \
+    if (n_elements % 8 == 0) { \
+        *total_lib_memory += (n_elements); \
     } \
     else { \
-        *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        *total_lib_memory += ((n_elements) + (8 - ((n_elements) % 8))); \
     } \
 } \
-if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
+if (*(memory_map_index) >= MAX_NUM_PTR) { \
     return EB_ErrorInsufficientResources; \
 } \
 libMallocCount++;
 
-#define EB_CALLOC(type, pointer, count, size, pointerClass) \
+#define EB_CALLOC(type, pointer, count, size, pointer_class) \
 pointer = (type) calloc(count, size); \
 if (pointer == (type)EB_NULL) { \
     return EB_ErrorInsufficientResources; \
 } \
 else { \
-    memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-    memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
+    memory_map[*(memory_map_index)].ptrType = pointer_class; \
+    memory_map[(*(memory_map_index))++].ptr = pointer; \
     if (count % 8 == 0) { \
-        *totalLibMemory += (count); \
+        *total_lib_memory += (count); \
     } \
     else { \
-        *totalLibMemory += ((count) + (8 - ((count) % 8))); \
+        *total_lib_memory += ((count) + (8 - ((count) % 8))); \
     } \
 } \
-if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
+if (*(memory_map_index) >= MAX_NUM_PTR) { \
     return EB_ErrorInsufficientResources; \
 } \
 libMallocCount++;
 
-#define EB_CREATESEMAPHORE(type, pointer, nElements, pointerClass, initialCount, maxCount) \
-pointer = EbCreateSemaphore(initialCount, maxCount); \
+#define EB_CREATESEMAPHORE(type, pointer, n_elements, pointer_class, initial_count, max_count) \
+pointer = eb_create_semaphore(initial_count, max_count); \
 if (pointer == (type)EB_NULL) { \
     return EB_ErrorInsufficientResources; \
 } \
 else { \
-    memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-    memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-    if (nElements % 8 == 0) { \
-        *totalLibMemory += (nElements); \
+    memory_map[*(memory_map_index)].ptrType = pointer_class; \
+    memory_map[(*(memory_map_index))++].ptr = pointer; \
+    if (n_elements % 8 == 0) { \
+        *total_lib_memory += (n_elements); \
     } \
     else { \
-        *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        *total_lib_memory += ((n_elements) + (8 - ((n_elements) % 8))); \
     } \
 } \
-if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
+if (*(memory_map_index) >= MAX_NUM_PTR) { \
     return EB_ErrorInsufficientResources; \
 } \
 libSemaphoreCount++;
 
-#define EB_CREATEMUTEX(type, pointer, nElements, pointerClass) \
-pointer = EbCreateMutex(); \
+#define EB_CREATEMUTEX(type, pointer, n_elements, pointer_class) \
+pointer = eb_create_mutex(); \
 if (pointer == (type)EB_NULL){ \
     return EB_ErrorInsufficientResources; \
 } \
 else { \
-    memoryMap[*(memoryMapIndex)].ptrType = pointerClass; \
-    memoryMap[(*(memoryMapIndex))++].ptr = pointer; \
-    if (nElements % 8 == 0) { \
-        *totalLibMemory += (nElements); \
+    memory_map[*(memory_map_index)].ptrType = pointer_class; \
+    memory_map[(*(memory_map_index))++].ptr = pointer; \
+    if (n_elements % 8 == 0) { \
+        *total_lib_memory += (n_elements); \
     } \
     else { \
-        *totalLibMemory += ((nElements) + (8 - ((nElements) % 8))); \
+        *total_lib_memory += ((n_elements) + (8 - ((n_elements) % 8))); \
     } \
 } \
-if (*(memoryMapIndex) >= MAX_NUM_PTR) { \
+if (*(memory_map_index) >= MAX_NUM_PTR) { \
     return EB_ErrorInsufficientResources; \
 } \
 libMutexCount++;
 
 #define EB_MEMORY() \
 printf("Total Number of Mallocs in Library: %d\n", libMallocCount); \
-printf("Total Number of Threads in Library: %d\n", libThreadCount); \
+printf("Total Number of Threads in Library: %d\n", lib_thread_count); \
 printf("Total Number of Semaphore in Library: %d\n", libSemaphoreCount); \
 printf("Total Number of Mutex in Library: %d\n", libMutexCount); \
-printf("Total Library Memory: %.2lf KB\n\n",*totalLibMemory/(double)1024);
+printf("Total Library Memory: %.2lf KB\n\n",*total_lib_memory/(double)1024);
 
 
 #define EB_APP_MEMORY() \
@@ -2490,7 +2497,7 @@ extern errno_t
 extern rsize_t
     strnlen_ss(const char *s, rsize_t smax);
 
-extern void DRDmemcpy(void  *dstPtr, void *srcPtr, uint32_t  cnt);
+extern void DRDmemcpy(void  *dst_ptr, void *src_ptr, uint32_t  cnt);
 #define EB_MEMCPY(dst, src, size) \
 DRDmemcpy(dst, src, size)
 
@@ -2510,9 +2517,9 @@ strcmp(target,token)
 #define EB_STRLEN(target, max_size) \
 strnlen_ss(target, max_size)
 
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+//#ifdef __cplusplus
+//}
+//#endif // __cplusplus
 
 
 
@@ -3001,6 +3008,14 @@ typedef enum EbPictureDepthMode {
     PIC_OPEN_LOOP_DEPTH_MODE    = 7
 } EbPictureDepthMode;
 
+#if ADAPTIVE_DEPTH_PARTITIONING
+#define EB_SB_DEPTH_MODE              uint8_t
+#define SB_SQ_BLOCKS_DEPTH_MODE             1
+#define SB_SQ_NON4_BLOCKS_DEPTH_MODE        2
+#define SB_OPEN_LOOP_DEPTH_MODE             3
+#define SB_PRED_OPEN_LOOP_DEPTH_MODE        4
+#define SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE  5
+#else
 typedef enum EbLcuDepthMode {
 
     LCU_FULL85_DEPTH_MODE = 1,
@@ -3013,7 +3028,7 @@ typedef enum EbLcuDepthMode {
     LCU_PRED_OPEN_LOOP_DEPTH_MODE = 8,
     LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE = 9
 } EbLcuDepthMode;
-
+#endif
 typedef enum EB_INTRA4x4_SEARCH_METHOD {
     INTRA4x4_OFF = 0,
     INTRA4x4_INLINE_SEARCH = 1,
@@ -3369,7 +3384,6 @@ static const uint32_t MD_SCAN_TO_OIS_32x32_SCAN[CU_MAX_COUNT] =
     /*83 */3,
     /*84 */3,
 };
-#if ME_HME_OQ
 /******************************************************************************
                             ME/HME settings
 *******************************************************************************/
@@ -3382,39 +3396,39 @@ static const uint8_t EnableHmeLevel0Flag[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] 
 };
 static const uint16_t HmeLevel0TotalSearchAreaWidth[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {  48,   48,   48,   48,   48,   48,   48,   48 },
-    { 112,   96,   64,   64,   64,   64,   64,   64 },
-    { 128,  128,   96,   96,   96,   96,   96,   96 },
+    { 112,  112,   96,   96,   96,   64,   64,   64 },
+    { 128,  128,  128,  128,  128,   96,   96,   96 },
     { 128,  128,  128,  128,  128,  128,  128,  128 }
 };
 
 static const uint16_t HmeLevel0SearchAreaInWidthArrayLeft[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {  24,   24,   24,   24,   24,   24,   24,   24 },
-    {  56,   48,   32,   32,   32,   32,   32,   32 },
-    {  64,   64,   48,   48,   48,   48,   48,   48 },
+    {  56,   56,   48,   48,   48,   32,   32,   32 },
+    {  64,   64,   64,   64,   64,   48,   48,   48 },
     {  64,   64,   64,   64,   64,   64,   64,   64 }
 };
 static const uint16_t HmeLevel0SearchAreaInWidthArrayRight[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {  24,   24,   24,   24,   24,   24,   24,   24 },
-    {  56,   48,   32,   32,   32,   32,   32,   32 },
-    {  64,   64,   48,   48,   48,   48,   48,   48 },
+    {  56,   56,   48,   48,   48,   32,   32,   32 },
+    {  64,   64,   64,   64,   64,   48,   48,   48 },
     {  64,   64,   64,   64,   64,   64,   64,   64 }
 };
 static const uint16_t HmeLevel0TotalSearchAreaHeight[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {  40,   40,   40,   40,   40,   40,   40,   40 },
-    {  64,   64,   48,   48,   48,   48,   48,   48 },
-    {  80,   80,   48,   48,   48,   48,   48,   48 },
+    {  64,   64,   64,   64,   64,   48,   48,   48 },
+    {  80,   80,   80,   80,   80,   48,   48,   48 },
     {  80,   80,   80,   80,   80,   80,   80,   80 }
 };
 static const uint16_t HmeLevel0SearchAreaInHeightArrayTop[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {  20,   20,   20,   20,   20,   20,   20,   20 },
-    {  32,   32,   24,   24,   24,   24,   24,   24 },
-    {  40,   40,   24,   24,   24,   24,   24,   24 },
+    {  32,   32,   32,   32,   32,   24,   24,   24 },
+    {  40,   40,   40,   40,   40,   24,   24,   24 },
     {  40,   40,   40,   40,   40,   40,   40,   40 }
 };
 static const uint16_t HmeLevel0SearchAreaInHeightArrayBottom[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {  20,   20,   20,   20,   20,   20,   20,   20 },
-    {  32,   32,   24,   24,   24,   24,   24,   24 },
-    {  40,   40,   24,   24,   24,   24,   24,   24 },
+    {  32,   32,   32,   32,   32,   24,   24,   24 },
+    {  40,   40,   40,   40,   40,   24,   24,   24 },
     {  40,   40,   40,   40,   40,   40,   40,   40 }
 };
 
@@ -3427,28 +3441,28 @@ static const uint8_t EnableHmeLevel1Flag[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] 
     {   1,    1,    1,    1,    1,    1,    1,    1 }       // INPUT_SIZE_4K_RANGE
 };
 static const uint16_t HmeLevel1SearchAreaInWidthArrayLeft[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 }
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 }
 };
 static const uint16_t HmeLevel1SearchAreaInWidthArrayRight[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 }
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 }
 };
 static const uint16_t HmeLevel1SearchAreaInHeightArrayTop[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 }
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 }
 };
 static const uint16_t HmeLevel1SearchAreaInHeightArrayBottom[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 },
-    {  16,   16,   16,   16,    8,    8,    8,    8 }
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 },
+    {  16,   16,   16,   16,    16,    8,    8,    8 }
 };
 // HME LEVEL 2
 //     M0    M1    M2    M3    M4    M5    M6    M7
@@ -3459,47 +3473,44 @@ static const uint8_t EnableHmeLevel2Flag[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] 
     {   1,    1,    1,    1,    1,    1,    1,    1 }       // INPUT_SIZE_4K_RANGE
 };
 static const uint16_t HmeLevel2SearchAreaInWidthArrayLeft[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 }
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 }
 };
 static const uint16_t HmeLevel2SearchAreaInWidthArrayRight[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 }
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 }
 };
 static const uint16_t HmeLevel2SearchAreaInHeightArrayTop[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 }
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 }
 };
 static const uint16_t HmeLevel2SearchAreaInHeightArrayBottom[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 },
-    {   8,    8,    8,    8,    4,    4,    4,    4 }
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 },
+    {   8,    8,    8,    8,    8,    4,    4,    4 }
 };
 
 static const uint8_t SearchAreaWidth[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {  64,   64,   64,   64,   56,   48,   40,   32 },
-    { 112,   96,   64,   64,   56,   48,   40,   32 },
-    { 128,  112,   96,   64,   56,   48,   40,   32 },
-    { 128,  112,   96,   64,   56,   48,   40,   32 } 
-
+    {  64,   64,   64,   64,   64,   48,   48,   48 },
+    { 112,   96,   96,   96,   96,   48,   48,   48 },
+    { 128,  112,  112,  112,  112,   48,   48,   48 },
+    { 128,  112,  112,  112,  112,   48,   48,   48 }
 };
-
 static const uint8_t SearchAreaHeight[INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
-    {  64,   64,   64,   64,   56,   48,   40,   32 },
-    { 112,   96,   64,   64,   56,   48,   40,   32 },
-    { 128,  112,   96,   64,   56,   48,   40,   32 },
-    { 128,  112,   96,   64,   56,   48,   40,   32 } 
+    {  64,   64,   64,   64,   64,   48,   48,   48 },
+    { 112,   96,   96,   96,   96,   48,   48,   48 },
+    { 128,  112,  112,  112,  112,   48,   48,   48 },
+    { 128,  112,  112,  112,  112,   48,   48,   48 }
 
 //     M0    M1    M2    M3    M4    M5    M6    M7
 };
-#endif
 
 #ifdef __cplusplus
 }

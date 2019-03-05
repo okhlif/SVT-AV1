@@ -43,14 +43,14 @@ extern "C" {
 #define SEGMENT_MAX_COUNT   64
 #define SEGMENT_COMPLETION_MASK_SET(mask, index)        MULTI_LINE_MACRO_BEGIN (mask) |= (((uint64_t) 1) << (index)); MULTI_LINE_MACRO_END
 #define SEGMENT_COMPLETION_MASK_TEST(mask, total_count)  ((mask) == ((((uint64_t) 1) << (total_count)) - 1))
-#define SEGMENT_ROW_COMPLETION_TEST(mask, rowIndex, width) ((((mask) >> ((rowIndex) * (width))) & ((1ull << (width))-1)) == ((1ull << (width))-1))
-#define SEGMENT_CONVERT_IDX_TO_XY(index, x, y, picWidthInLcu) \
+#define SEGMENT_ROW_COMPLETION_TEST(mask, row_index, width) ((((mask) >> ((row_index) * (width))) & ((1ull << (width))-1)) == ((1ull << (width))-1))
+#define SEGMENT_CONVERT_IDX_TO_XY(index, x, y, pic_width_in_lcu) \
                                                         MULTI_LINE_MACRO_BEGIN \
-                                                            (y) = (index) / (picWidthInLcu); \
-                                                            (x) = (index) - (y) * (picWidthInLcu); \
+                                                            (y) = (index) / (pic_width_in_lcu); \
+                                                            (x) = (index) - (y) * (pic_width_in_lcu); \
                                                         MULTI_LINE_MACRO_END
-#define SEGMENT_START_IDX(index, picSizeInLcu, numOfSeg) (((index) * (picSizeInLcu)) / (numOfSeg))
-#define SEGMENT_END_IDX(index, picSizeInLcu, numOfSeg)   ((((index)+1) * (picSizeInLcu)) / (numOfSeg))
+#define SEGMENT_START_IDX(index, pic_size_in_lcu, num_of_seg) (((index) * (pic_size_in_lcu)) / (num_of_seg))
+#define SEGMENT_END_IDX(index, pic_size_in_lcu, num_of_seg)   ((((index)+1) * (pic_size_in_lcu)) / (num_of_seg))
 
 // BDP OFF
 #define MD_NEIGHBOR_ARRAY_INDEX                0
@@ -13591,7 +13591,7 @@ extern "C" {
         int32_t rst_end_stripe[MAX_TILE_ROWS];
         // Output of loop restoration
         Yv12BufferConfig rst_frame;
-        // Pointer to a scratch buffer used by self-guided restoration
+        // pointer to a scratch buffer used by self-guided restoration
         int32_t *rst_tmpbuf;
         Yv12BufferConfig *frame_to_show;
         int32_t byte_alignment;
@@ -13653,13 +13653,13 @@ extern "C" {
      **************************************/
     typedef struct MdSegmentCtrl_s
     {
-        uint64_t                                completion_mask;
-        EbHandle                                write_lock_mutex;
-        uint32_t                                total_count;
-        uint32_t                                column_count;
-        uint32_t                                row_count;
-        EbBool                                  in_progress;
-        uint32_t                                current_row_idx;
+        uint64_t completion_mask;
+        EbHandle write_lock_mutex;
+        uint32_t total_count;
+        uint32_t column_count;
+        uint32_t row_count;
+        EbBool   in_progress;
+        uint32_t current_row_idx;
 
     } MdSegmentCtrl_t;
 
@@ -13925,7 +13925,7 @@ extern "C" {
         // Data attached to the picture. This includes data passed from the application, or other data the encoder attaches
         // to the picture.
         EbLinkedListNode                     *data_ll_head_ptr;
-        // Pointer to data to be passed back to the application when picture encoding is done
+        // pointer to data to be passed back to the application when picture encoding is done
         EbLinkedListNode                     *app_out_data_ll_head_ptr;
 
         EbBufferHeaderType                   *input_ptr;            // input picture buffer 
@@ -14097,26 +14097,14 @@ extern "C" {
         EbBool                                enable_hme_level0_flag;
         EbBool                                enable_hme_level1_flag;
         EbBool                                enable_hme_level2_flag;
-#if !ME_HME_OQ
-        // ME Parameters
-        uint8_t                               search_area_width;
-        uint8_t                               search_area_height;
-        // HME Parameters
-        uint16_t                              number_hme_search_region_in_width;
-        uint16_t                              number_hme_search_region_in_height;
-        uint16_t                              hme_level0_total_search_area_width;
-        uint16_t                              hme_level0_total_search_area_height;
-        uint16_t                              hme_level0_search_area_in_width_array[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-        uint16_t                              hme_level0_search_area_in_height_array[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-        uint16_t                              hme_level1_search_area_in_width_array[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-        uint16_t                              hme_level1_search_area_in_height_array[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-        uint16_t                              hme_level2_search_area_in_width_array[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
-        uint16_t                              hme_level2_search_area_in_height_array[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-#endif
+
         // MD
         EbEncMode                             enc_mode;
-
+#if ADAPTIVE_DEPTH_PARTITIONING
+        EB_SB_DEPTH_MODE                     *sb_depth_mode_array;
+#else
         EbLcuDepthMode                       *sb_md_mode_array;
+#endif		
 #if !CHROMA_BLIND
         EbChromaMode                          chroma_mode;
 #endif
@@ -14127,11 +14115,11 @@ extern "C" {
 
         // Multi-modes signal(s) 
         EbPictureDepthMode                    pic_depth_mode;
-#if !INTERPOLATION_SEARCH_LEVELS
-        uint8_t                               interpolation_filter_search_mode;
-#endif
         uint8_t                               loop_filter_mode;
         uint8_t                               intra_pred_mode;
+#if TWO_FAST_LOOP
+        uint8_t                               enable_two_fast_loops;
+#endif
         //**********************************************************************************************************//
         FRAME_TYPE                            av1FrameType;
         Av1RpsNode_t                          av1RefSignal;
@@ -14286,17 +14274,11 @@ extern "C" {
         int32_t                               cdf_ref_frame_strenght;
         int32_t                               use_ref_frame_cdef_strength;
 #endif
-#if TX_SEARCH_LEVELS
         uint8_t                               tx_search_level;
         uint64_t                              tx_weight;
         uint8_t                               tx_search_reduced_set;
-#endif
-#if INTERPOLATION_SEARCH_LEVELS
         uint8_t                               interpolation_search_level;
-#endif
-#if NSQ_SEARCH_LEVELS
         uint8_t                               nsq_search_level;
-#endif
 
     } PictureParentControlSet_t;
 
@@ -14557,13 +14539,13 @@ extern "C" {
     /**************************************
      * Extern Function Declarations
      **************************************/
-    extern EbErrorType PictureControlSetCtor(
+    extern EbErrorType picture_control_set_ctor(
         EbPtr *object_dbl_ptr,
         EbPtr  object_init_data_ptr);
 
-    extern EbErrorType PictureParentControlSetCtor(
+    extern EbErrorType picture_parent_control_set_ctor(
         EbPtr *object_dbl_ptr,
-        EbPtr object_init_data_ptr);
+        EbPtr  object_init_data_ptr);
 
 
 #ifdef __cplusplus
