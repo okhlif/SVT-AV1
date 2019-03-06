@@ -806,8 +806,10 @@ EbErrorType signal_derivation_multi_processes_oq(
                 picture_control_set_ptr->intra_pred_mode = 2;
             else
                 picture_control_set_ptr->intra_pred_mode = 3;
+#if OIS_BASED_INTRA
         else 
             picture_control_set_ptr->intra_pred_mode = 4;
+#endif
     } 
     
     if (MR_MODE)
