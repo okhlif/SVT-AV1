@@ -777,7 +777,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     else
         picture_control_set_ptr->tx_search_reduced_set = 1;
 
-    // Intra prediction levels                      Settings
+    // Intra prediction modes                       Settings
     // 0                                            FULL  
     // 1                                            LIGHT per block : disable_z2_prediction && disable_angle_refinement  for 64/32/4
     // 2                                            OFF per block : disable_angle_prediction for 64/32/4
@@ -788,7 +788,10 @@ EbErrorType signal_derivation_multi_processes_oq(
          picture_control_set_ptr->intra_pred_mode = 0;
     else {
         if (picture_control_set_ptr->enc_mode  <= ENC_M1) 
-            picture_control_set_ptr->intra_pred_mode = 0;
+            if (picture_control_set_ptr->temporal_layer_index == 0)
+                picture_control_set_ptr->intra_pred_mode = 1;
+            else
+                picture_control_set_ptr->intra_pred_mode = 2;
         else if (picture_control_set_ptr->enc_mode <= ENC_M5) 
             if (picture_control_set_ptr->temporal_layer_index == 0)
                 picture_control_set_ptr->intra_pred_mode = 1;
