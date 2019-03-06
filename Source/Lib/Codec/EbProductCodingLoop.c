@@ -1430,7 +1430,7 @@ void ProductPerformFastLoop(
                         }
 
                     }
-                    
+                }                
                     // Fast Cost Calc
                 *(candidateBuffer->fast_cost_ptr) = Av1ProductFastCostFuncTable[candidate_ptr->type] (
                     cu_ptr, 
@@ -1484,7 +1484,7 @@ void ProductPerformFastLoop(
                     }
                     // Initialize Fast Cost - to do not interact with the second Fast-Cost Search
                     *(candidateBuffer->fast_cost_ptr) = 0xFFFFFFFFFFFFFFFFull;
-                }
+
             }
         } while (--fastLoopCandidateIndex >= 0);
     }
