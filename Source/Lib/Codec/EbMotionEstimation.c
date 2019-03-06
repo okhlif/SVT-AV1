@@ -8162,14 +8162,14 @@ EbErrorType open_loop_intra_search_sb(
         while (pa_blk_index < CU_MAX_COUNT)
         {
            
-            const CodedUnitStats_t  *cuStatsPtr;
-            cuStatsPtr = GetCodedUnitStats(pa_blk_index);
-            
+            const CodedUnitStats_t  *blk_stats_ptr;
+            blk_stats_ptr = GetCodedUnitStats(pa_blk_index);
+            uint8_t bsize = blk_stats_ptr->size;
             if (sb_params->raster_scan_cu_validity[MD_SCAN_TO_RASTER_SCAN[pa_blk_index]]) {
 
                 ois_candidate_t *ois_blk_ptr = ois_sb_results_ptr->ois_candidate_array[pa_blk_index];
-                cu_origin_x = sb_params->origin_x + cuStatsPtr->origin_x;
-                cu_origin_y = sb_params->origin_y + cuStatsPtr->origin_y;
+                cu_origin_x = sb_params->origin_x + blk_stats_ptr->origin_x;
+                cu_origin_y = sb_params->origin_y + blk_stats_ptr->origin_y;
 
                 // Fill Neighbor Arrays
                 update_neighbor_samples_array_open_loop(
@@ -8179,8 +8179,8 @@ EbErrorType open_loop_intra_search_sb(
                     input_ptr->stride_y,
                     cu_origin_x,
                     cu_origin_y,
-                    cuStatsPtr->size,
-                    cuStatsPtr->size);
+                    bsize,
+                    bsize);
 
                 uint8_t * above_row;
                 uint8_t * left_col;
@@ -8202,15 +8202,15 @@ EbErrorType open_loop_intra_search_sb(
                 uint8_t     intra_mode_start = DC_PRED;
                 uint8_t     intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
 
-                EbBool      use_angle_delta = (cuStatsPtr->size >= 8);
+                EbBool      use_angle_delta = (bsize >= 8);
                 uint8_t     angle_delta_candidate_count = use_angle_delta ? 5 : 1;
                 uint8_t     angle_delta_counter = 0;
 
                 uint8_t     disable_angular_prediction = 0;
-                disable_angular_prediction = picture_control_set_ptr->temporal_layer_index > 0 ? 1 : (cuStatsPtr->size > 16) ? 1 : 0;
+                disable_angular_prediction = picture_control_set_ptr->temporal_layer_index > 0 ? 1 : (bsize > 16) ? 1 : 0;
 
                 angle_delta_candidate_count = disable_angular_prediction ? 1 : angle_delta_candidate_count;
-                TxSize  tx_size = cuStatsPtr->size == 8 ? TX_8X8 : cuStatsPtr->size == 16 ? TX_16X16: cuStatsPtr->size == 32 ? TX_32X32 : TX_64X64;
+                TxSize  tx_size = bsize == 8 ? TX_8X8 : bsize == 16 ? TX_16X16: bsize == 32 ? TX_32X32 : TX_64X64;
 
                 for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {              
                     if (av1_is_directional_mode((PredictionMode)ois_intra_mode)) {
@@ -8230,13 +8230,13 @@ EbErrorType open_loop_intra_search_sb(
                                     left_col,
                                     context_ptr);
                                 //Distortion
-                                ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][cuStatsPtr->size >> 3]( // Always SAD without weighting
+                                ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][bsize >> 3]( // Always SAD without weighting
                                     &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),
                                     input_ptr->stride_y,
                                     &(context_ptr->me_context_ptr->sb_buffer[0]),
                                     BLOCK_SIZE_64,
-                                    cuStatsPtr->size,
-                                    cuStatsPtr->size);
+                                    bsize,
+                                    bsize);
                                 //kepp track of best SAD
                                 if (ois_blk_ptr[ois_intra_count].distortion < best_intra_ois_distortion) {
                                     best_intra_ois_index = ois_intra_count;
@@ -8260,13 +8260,13 @@ EbErrorType open_loop_intra_search_sb(
                                 left_col,
                                 context_ptr);
                             //Distortion
-                            ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][cuStatsPtr->size >> 3]( // Always SAD without weighting
+                            ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][bsize >> 3]( // Always SAD without weighting
                                 &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),
                                 input_ptr->stride_y,
                                 &(context_ptr->me_context_ptr->sb_buffer[0]),
                                 BLOCK_SIZE_64,
-                                cuStatsPtr->size,
-                                cuStatsPtr->size);                            
+                                bsize,
+                                bsize);                            
                             //kepp track of best SAD
                             if (ois_blk_ptr[ois_intra_count].distortion < best_intra_ois_distortion) {
                                 best_intra_ois_index = ois_intra_count;
