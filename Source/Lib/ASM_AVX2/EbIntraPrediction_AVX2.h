@@ -122,7 +122,7 @@ extern "C" {
         uint8_t        *prediction_ptr,                 //output parameter, pointer to the prediction
         const uint32_t  prediction_buffer_stride,       //input parameter, denotes the stride for the prediction ptr
         const EbBool    skip);
-
+#if !OIS_BASED_INTRA
     uint32_t update_neighbor_dc_intra_pred_avx2_intrin(
         uint8_t  *y_intra_reference_array_reverse,
         uint16_t  input_height,
@@ -134,7 +134,7 @@ extern "C" {
         uint32_t  src_origin_y,
         uint32_t  block_size,
         EbAsm     asm_type);
-
+#endif
     void intra_mode_angular_av1_z1_16bit_4x4_avx2(
         const uint32_t  size,
         uint16_t       *ref_samples,

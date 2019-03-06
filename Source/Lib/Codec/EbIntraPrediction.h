@@ -368,6 +368,28 @@ extern "C" {
     extern void IntraOpenLoopReferenceSamplesDtor(
         IntraReferenceSamplesOpenLoop_t  *context_ptr);
 
+#if OIS_BASED_INTRA
+    extern EbErrorType update_neighbor_samples_array_open_loop(
+        uint8_t                           *above_ref,
+        uint8_t                            *left_ref,
+        IntraReferenceSamplesOpenLoop_t    *intra_ref_ptr,
+        EbPictureBufferDesc_t              *input_ptr,
+        uint32_t                            stride,
+        uint32_t                            srcOriginX,
+        uint32_t                            srcOriginY,
+        uint8_t                             bwidth,
+        uint8_t                             bheight);
+    extern EbErrorType intra_prediction_open_loop(
+         int32_t  p_angle ,
+        uint8_t                          ois_intra_mode,
+        uint32_t                         srcOriginX,
+        uint32_t                         srcOriginY,
+        const  BlockGeom                *blk_geom,
+        uint8_t                         *above_row,
+        uint8_t                         *left_col,
+        MotionEstimationContext_t       *context_ptr,                  // input parameter, ME context
+        EbAsm                            asm_type);
+#else
     extern EbErrorType UpdateNeighborSamplesArrayOpenLoop(
         IntraReferenceSamplesOpenLoop_t *intra_ref_ptr,
         EbPictureBufferDesc_t           *input_ptr,
@@ -381,7 +403,7 @@ extern "C" {
         MotionEstimationContext_t   *context_ptr,
         uint32_t           openLoopIntraCandidate,
         EbAsm                       asm_type);
-
+#endif
 #if !QT_10BIT_SUPPORT
     extern EbErrorType Intra4x4IntraPredictionCL(
         uint32_t                                pu_index,
@@ -654,7 +676,8 @@ extern "C" {
         intra_mode_dc_luma_avx2_intrin,
 
     };
-
+    
+#if !OIS_BASED_INTRA
     uint32_t UpdateNeighborDcIntraPred(
         MotionEstimationContext_t       *context_ptr,
         EbPictureBufferDesc_t           *input_ptr,
@@ -662,7 +685,7 @@ extern "C" {
         uint32_t                           src_origin_y,
         uint32_t                           block_size,
         EbAsm                             asm_type);
-
+#endif
     static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraDCLuma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
         // NON_AVX2
         intra_mode_dc_luma16bit_sse4_1_intrin,
