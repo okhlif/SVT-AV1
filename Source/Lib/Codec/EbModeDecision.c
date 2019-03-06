@@ -2385,7 +2385,6 @@ void  inject_intra_candidates_ois(
         if (av1_is_directional_mode((PredictionMode)intra_mode)) {
 
             int32_t angle_delta = ois_blk_ptr[can_total_cnt].angle_delta ;
-            int32_t  p_angle = mode_to_angle_map[(PredictionMode)intra_mode] + angle_delta * ANGLE_STEP;
             candidate_array[can_total_cnt].type = INTRA_MODE;
             candidate_array[can_total_cnt].intra_luma_mode = intra_mode;
 #if TWO_FAST_LOOP 

@@ -70,6 +70,7 @@ static const uint8_t numberOfOisModePoints[5/*IOS poitnt*/] = {
 };
 
 #define MAX_INTRA_IN_MD   9
+#if !OIS_BASED_INTRA
 //CHKN: Note that the max number set in this table should be referenced by the upper macro!!!
 static uint8_t intraSearchInMd[5][4] = {
     /*depth0*/    /*depth1*/    /*depth2*/    /*depth3*/
@@ -83,7 +84,7 @@ static uint8_t intraSearchInMd[5][4] = {
 // Intra Open Loop
 uint32_t iSliceModesArray[11] = { EB_INTRA_PLANAR, EB_INTRA_DC, EB_INTRA_HORIZONTAL, EB_INTRA_VERTICAL, EB_INTRA_MODE_2, EB_INTRA_MODE_18, EB_INTRA_MODE_34, EB_INTRA_MODE_6, EB_INTRA_MODE_14, EB_INTRA_MODE_22, EB_INTRA_MODE_30 };
 uint32_t stage1ModesArray[9] = { EB_INTRA_HORIZONTAL, EB_INTRA_VERTICAL, EB_INTRA_MODE_2, EB_INTRA_MODE_18, EB_INTRA_MODE_34, EB_INTRA_MODE_6, EB_INTRA_MODE_14, EB_INTRA_MODE_22, EB_INTRA_MODE_30 };
-
+#endif
 #define REFERENCE_PIC_LIST_0  0
 #define REFERENCE_PIC_LIST_1  1
 
@@ -8175,7 +8176,6 @@ EbErrorType open_loop_intra_search_sb(
                 update_neighbor_samples_array_open_loop(
                     above_ref,
                     left_ref,
-                    context_ptr->intra_ref_ptr,
                     input_ptr,
                     input_ptr->stride_y,
                     cu_origin_x,
@@ -8198,7 +8198,7 @@ EbErrorType open_loop_intra_search_sb(
 
                 uint8_t     ois_intra_mode;
                 uint8_t     ois_intra_count = 0;
-                uint8_t     best_intra_ois_index;
+                uint8_t     best_intra_ois_index = 0;
                 uint32_t    best_intra_ois_distortion = 64 * 64 * 255;
                 uint8_t     intra_mode_start = DC_PRED;
                 uint8_t     intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
@@ -8228,8 +8228,7 @@ EbErrorType open_loop_intra_search_sb(
                                     blk_geom,
                                     above_row,
                                     left_col,
-                                    context_ptr,
-                                    asm_type);
+                                    context_ptr);
                                 //Distortion
                                 ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
                                     &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),
@@ -8259,8 +8258,7 @@ EbErrorType open_loop_intra_search_sb(
                                 blk_geom,
                                 above_row,
                                 left_col,
-                                context_ptr,
-                                asm_type);
+                                context_ptr);
                             //Distortion
                             ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
                                 &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),

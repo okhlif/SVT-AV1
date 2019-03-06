@@ -2432,6 +2432,8 @@ EbErrorType GenerateChromaIntraReference16bitSamplesEncodePass(
 }
 
 #endif
+
+    #if !OIS_BASED_INTRA
 static void IntraModeAngular_27To33(
     uint32_t            mode,                       //input parameter, indicates the Intra luma mode
     const uint32_t      size,                       //input parameter, denotes the size of the current PU
@@ -2606,6 +2608,7 @@ static void IntraModeAngular_3To9(
 
     return;
 }
+#endif
 #if !QT_10BIT_SUPPORT
 void highbd_dc_predictor(
     EbBool                         is_left_availble,
@@ -3485,6 +3488,7 @@ void IntraModeAngular_AV1_Z3_16bit(
     return;
 }
 
+    #if !OIS_BASED_INTRA
 
 /** IntraModeAngular_all()
         is the main function to compute intra  angular prediction for a PU
@@ -3574,6 +3578,8 @@ static inline void IntraModeAngular_all(
         break;
     }
 }
+
+#endif
 #if !QT_10BIT_SUPPORT
 /** IntraPrediction()
         is the main function to compute intra prediction for a PU
@@ -10133,11 +10139,10 @@ EbErrorType AV1IntraPredictionCL(
 EbErrorType update_neighbor_samples_array_open_loop(
         uint8_t                           *above_ref,
         uint8_t                            *left_ref,
-        IntraReferenceSamplesOpenLoop_t    *intra_ref_ptr,
         EbPictureBufferDesc_t              *input_ptr,
         uint32_t                            stride,
-        uint32_t                            srcOriginX,
-        uint32_t                            srcOriginY,
+        uint32_t                            src_origin_x,
+        uint32_t                            src_origin_y,
         uint8_t                             bwidth,
         uint8_t                             bheight)
 {
@@ -10145,88 +10150,57 @@ EbErrorType update_neighbor_samples_array_open_loop(
     EbErrorType    return_error = EB_ErrorNone;
 
     uint32_t idx;
-    uint8_t  *srcPtr;
-   // uint8_t  *dstPtr;
-    uint8_t  *readPtr;
-
+    uint8_t  *src_ptr;
+    uint8_t  *read_ptr;
     uint32_t count;
 
-   // uint8_t *yBorderReverse = intra_ref_ptr->y_intra_reference_array_reverse;
-   // uint8_t *yBorder = intra_ref_ptr->y_intra_reference_array;
-   // uint8_t *yBorderLoc;
 
     uint32_t width = input_ptr->width;
     uint32_t height = input_ptr->height;
-    uint32_t blockSizeHalf = bwidth << 1;
+    uint32_t block_size_half = bwidth << 1;
 
     // Adjust the Source ptr to start at the origin of the block being updated
-    srcPtr = input_ptr->buffer_y + (((srcOriginY + input_ptr->origin_y) * stride) + (srcOriginX + input_ptr->origin_x));
-
-    // Adjust the Destination ptr to start at the origin of the Intra reference array
-  //  dstPtr = yBorderReverse;
+    src_ptr = input_ptr->buffer_y + (((src_origin_y + input_ptr->origin_y) * stride) + (src_origin_x + input_ptr->origin_x));
 
     //Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)
     EB_MEMSET(above_ref, 127, (bwidth << 1) + 1);
     EB_MEMSET(left_ref, 129, (bheight << 1) + 1);
 
-
-    
     // Get the upper left sample
-    if (srcOriginX != 0 && srcOriginY != 0) {
-
-        readPtr = srcPtr - stride - 1;
-        *above_ref = *readPtr;
-        *left_ref = *readPtr;
+    if (src_origin_x != 0 && src_origin_y != 0) {
+        read_ptr = src_ptr - stride - 1;
+        *above_ref = *read_ptr;
+        *left_ref = *read_ptr;
         left_ref++;
         above_ref++;
-    }
-    else {
+    }else {
         *above_ref = *left_ref = 128;
         left_ref++;
         above_ref++;
     }
-
-
     // Get the left-column
-    count = blockSizeHalf;
-
-    if (srcOriginX != 0) {
-
-        readPtr = srcPtr - 1;
-        count = ((srcOriginY + count) > height) ? count - ((srcOriginY + count) - height) : count;
-
+    count = block_size_half;
+    if (src_origin_x != 0) {
+        read_ptr = src_ptr - 1;
+        count = ((src_origin_y + count) > height) ? count - ((src_origin_y + count) - height) : count;
         for (idx = 0; idx < count; ++idx) {
-
-            *left_ref = *readPtr;
-            readPtr += stride;
+            *left_ref = *read_ptr;
+            read_ptr += stride;
             left_ref++;
         }
-
-        left_ref += (blockSizeHalf - count);
-
-    }
-    else {
-
+        left_ref += (block_size_half - count);
+    }else 
         left_ref += count;
-    }
-
-
+    
     // Get the top-row
-    count = blockSizeHalf;
-    if (srcOriginY != 0) {
-
-        readPtr = srcPtr - stride;
-
-        count = ((srcOriginX + count) > width) ? count - ((srcOriginX + count) - width) : count;
-        EB_MEMCPY(above_ref, readPtr, count);
-        above_ref += (blockSizeHalf - count);
-
-    }
-    else {
-
+    count = block_size_half;
+    if (src_origin_y != 0) {
+        read_ptr = src_ptr - stride;
+        count = ((src_origin_x + count) > width) ? count - ((src_origin_x + count) - width) : count;
+        EB_MEMCPY(above_ref, read_ptr, count);
+        above_ref += (block_size_half - count);
+    }else 
         above_ref += count;
-    }
-
 
     return return_error;
 }
@@ -10236,23 +10210,17 @@ EbErrorType update_neighbor_samples_array_open_loop(
 EbErrorType intra_prediction_open_loop(
      int32_t  p_angle ,
         uint8_t                          ois_intra_mode,
-        uint32_t                         srcOriginX,
-        uint32_t                         srcOriginY,
+        uint32_t                         src_origin_x,
+        uint32_t                         src_origin_y,
         const  BlockGeom                *blk_geom,
         uint8_t                         *above_row,
         uint8_t                         *left_col,
-        MotionEstimationContext_t       *context_ptr,                  // input parameter, ME context
-        EbAsm                            asm_type)
+        MotionEstimationContext_t       *context_ptr)                  // input parameter, ME context
+        
 {
     EbErrorType                return_error = EB_ErrorNone;
-
-
-//    int32_t p_angle = 0;
     PredictionMode mode = ois_intra_mode;
-    int32_t angle_delta = 0;
     const int32_t is_dr_mode = av1_is_directional_mode(mode);
-    //p_angle = mode_to_angle_map[mode] + angle_delta * ANGLE_STEP;
-
     uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
     uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
 
@@ -10262,8 +10230,7 @@ EbErrorType intra_prediction_open_loop(
     else {
         // predict
         if (mode == DC_PRED) {
-            dc_pred[srcOriginX > 0][srcOriginY > 0][blk_geom->txsize[0]](dst, dst_stride, above_row, left_col);
-           //   dc_pred_c[srcOriginX > 0][srcOriginY > 0]( dst,  dst_stride, blk_geom->bwidth , blk_geom->bheight ,above_row, left_col);        
+            dc_pred[src_origin_x > 0][src_origin_y > 0][blk_geom->txsize[0]](dst, dst_stride, above_row, left_col);     
         } else {
             pred[mode][blk_geom->txsize[0]](dst, dst_stride, above_row, left_col);
         }

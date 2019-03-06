@@ -306,7 +306,7 @@ extern "C" {
         EbAsm                                  asm_type);
 
 #endif
-
+#if !OIS_BASED_INTRA
     static const uint32_t intraLumaModeNumber[] = {
         18,
         35,
@@ -352,7 +352,7 @@ extern "C" {
         30,    //  Intra mode 33
         32,    //  Intra mode 34
     };
-
+#endif
     extern void intra_mode_angular_horizontal_kernel_ssse3_intrin(
         uint32_t            size,
         uint8_t            *ref_samp_main,
@@ -372,7 +372,6 @@ extern "C" {
     extern EbErrorType update_neighbor_samples_array_open_loop(
         uint8_t                           *above_ref,
         uint8_t                            *left_ref,
-        IntraReferenceSamplesOpenLoop_t    *intra_ref_ptr,
         EbPictureBufferDesc_t              *input_ptr,
         uint32_t                            stride,
         uint32_t                            srcOriginX,
@@ -387,8 +386,7 @@ extern "C" {
         const  BlockGeom                *blk_geom,
         uint8_t                         *above_row,
         uint8_t                         *left_col,
-        MotionEstimationContext_t       *context_ptr,                  // input parameter, ME context
-        EbAsm                            asm_type);
+        MotionEstimationContext_t       *context_ptr);                  // input parameter, ME context
 #else
     extern EbErrorType UpdateNeighborSamplesArrayOpenLoop(
         IntraReferenceSamplesOpenLoop_t *intra_ref_ptr,
@@ -556,7 +554,7 @@ extern "C" {
         uint16_t          dy,              //output parameter, pointer to the prediction
         uint16_t          bd);
 
-
+    #if !OIS_BASED_INTRA
     /***************************************
     * Function Ptrs
     ***************************************/
@@ -591,7 +589,7 @@ extern "C" {
         // AVX2
         intra_mode_horizontal_chroma_sse2_intrin,
     };
-
+#endif
 #if !QT_10BIT_SUPPORT
     static EB_INTRA_DC_AV1_TYPE FUNC_TABLE IntraDC_Av1_funcPtrArray[9][ASM_TYPE_TOTAL] = {
 
@@ -669,6 +667,7 @@ extern "C" {
 
     };
 #endif
+#if !OIS_BASED_INTRA
     static EB_INTRA_NOANG_TYPE FUNC_TABLE IntraDCLuma_funcPtrArray[ASM_TYPE_TOTAL] = {
         // NON_AVX2
         intra_mode_dc_luma_sse2_intrin,
@@ -677,7 +676,6 @@ extern "C" {
 
     };
     
-#if !OIS_BASED_INTRA
     uint32_t UpdateNeighborDcIntraPred(
         MotionEstimationContext_t       *context_ptr,
         EbPictureBufferDesc_t           *input_ptr,
@@ -685,7 +683,7 @@ extern "C" {
         uint32_t                           src_origin_y,
         uint32_t                           block_size,
         EbAsm                             asm_type);
-#endif
+
     static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraDCLuma_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
         // NON_AVX2
         intra_mode_dc_luma16bit_sse4_1_intrin,
@@ -718,6 +716,7 @@ extern "C" {
         // AVX2
         intra_mode_planar_av1_avx2_intrin,
     };
+#endif
 #if !QT_10BIT_SUPPORT
     static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraSmoothV_16bit_Av1_funcPtrArray[ASM_TYPE_TOTAL] = {
         // NON_AVX2
@@ -746,7 +745,8 @@ extern "C" {
         // AVX2
         ebav1_smooth_v_predictor,
     };
-
+    
+    #if !OIS_BASED_INTRA
     static EB_INTRA_NOANG_16bit_TYPE FUNC_TABLE IntraPlanar_16bit_funcPtrArray[ASM_TYPE_TOTAL] = {
         // NON_AVX2
         intra_mode_planar16bit_sse2_intrin,
@@ -794,7 +794,7 @@ extern "C" {
         intra_mode_angular_horizontal_kernel_avx2_intrin,
     };
 
-
+#endif
     static EB_INTRA_ANG_Z1_Z2_Z3_16bit_TYPE FUNC_TABLE IntraModeAngular_AV1_Z1_16bit_funcPtrArray[9][ASM_TYPE_TOTAL] = {
         // 4x4
         {
