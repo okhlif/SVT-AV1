@@ -8148,9 +8148,7 @@ EbErrorType open_loop_intra_search_sb(
 
     uint32_t    cu_origin_x;
     uint32_t    cu_origin_y;
-    uint32_t    ep_blk_index = 0;
     uint32_t    pa_blk_index = 0;
-    uint8_t     next_sq =0;
     uint8_t     is_16_bit = (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
 
     SbParams_t          *sb_params          = &sequence_control_set_ptr->sb_params_array[sb_index];
@@ -8161,16 +8159,17 @@ EbErrorType open_loop_intra_search_sb(
     uint8_t *above_ref = top_neigh_array;
     uint8_t *left_ref = left_neigh_array;
 
-        while (ep_blk_index < sequence_control_set_ptr->max_block_cnt)
+        while (pa_blk_index < CU_MAX_COUNT)
         {
-            next_sq = 1;      
-            pa_blk_index = ep_to_pa_block_index[ep_blk_index];
-            const  BlockGeom *  blk_geom = get_blk_geom_mds(ep_blk_index);
-            if (sequence_control_set_ptr->sb_geom[sb_index].block_is_inside_md_scan[ep_blk_index]) {
+           
+            const CodedUnitStats_t  *cuStatsPtr;
+            cuStatsPtr = GetCodedUnitStats(pa_blk_index);
+            
+            if (sb_params->raster_scan_cu_validity[MD_SCAN_TO_RASTER_SCAN[pa_blk_index]]) {
 
                 ois_candidate_t *ois_blk_ptr = ois_sb_results_ptr->ois_candidate_array[pa_blk_index];
-                cu_origin_x = sb_params->origin_x + blk_geom->origin_x;
-                cu_origin_y = sb_params->origin_y + blk_geom->origin_y;
+                cu_origin_x = sb_params->origin_x + cuStatsPtr->origin_x;
+                cu_origin_y = sb_params->origin_y + cuStatsPtr->origin_y;
 
                 // Fill Neighbor Arrays
                 update_neighbor_samples_array_open_loop(
@@ -8180,8 +8179,8 @@ EbErrorType open_loop_intra_search_sb(
                     input_ptr->stride_y,
                     cu_origin_x,
                     cu_origin_y,
-                    blk_geom->bwidth,
-                    blk_geom->bheight);
+                    cuStatsPtr->size,
+                    cuStatsPtr->size);
 
                 uint8_t * above_row;
                 uint8_t * left_col;
@@ -8203,14 +8202,15 @@ EbErrorType open_loop_intra_search_sb(
                 uint8_t     intra_mode_start = DC_PRED;
                 uint8_t     intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
 
-                EbBool      use_angle_delta = (blk_geom->bsize >= BLOCK_8X8);
+                EbBool      use_angle_delta = (cuStatsPtr->size >= 8);
                 uint8_t     angle_delta_candidate_count = use_angle_delta ? 5 : 1;
                 uint8_t     angle_delta_counter = 0;
 
                 uint8_t     disable_angular_prediction = 0;
-                disable_angular_prediction = picture_control_set_ptr->temporal_layer_index > 0 ? 1 : (blk_geom->sq_size > 16) ? 1 : 0;
+                disable_angular_prediction = picture_control_set_ptr->temporal_layer_index > 0 ? 1 : (cuStatsPtr->size > 16) ? 1 : 0;
 
                 angle_delta_candidate_count = disable_angular_prediction ? 1 : angle_delta_candidate_count;
+                TxSize  tx_size = cuStatsPtr->size == 8 ? TX_8X8 : cuStatsPtr->size == 16 ? TX_16X16: cuStatsPtr->size == 32 ? TX_32X32 : TX_64X64;
 
                 for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {              
                     if (av1_is_directional_mode((PredictionMode)ois_intra_mode)) {
@@ -8225,18 +8225,18 @@ EbErrorType open_loop_intra_search_sb(
                                     ois_intra_mode,
                                     cu_origin_x,
                                     cu_origin_y,
-                                    blk_geom,
+                                    tx_size,
                                     above_row,
                                     left_col,
                                     context_ptr);
                                 //Distortion
-                                ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
+                                ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][cuStatsPtr->size >> 3]( // Always SAD without weighting
                                     &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),
                                     input_ptr->stride_y,
                                     &(context_ptr->me_context_ptr->sb_buffer[0]),
                                     BLOCK_SIZE_64,
-                                    blk_geom->bwidth,
-                                    blk_geom->bheight);
+                                    cuStatsPtr->size,
+                                    cuStatsPtr->size);
                                 //kepp track of best SAD
                                 if (ois_blk_ptr[ois_intra_count].distortion < best_intra_ois_distortion) {
                                     best_intra_ois_index = ois_intra_count;
@@ -8255,18 +8255,18 @@ EbErrorType open_loop_intra_search_sb(
                                 ois_intra_mode,
                                 cu_origin_x,
                                 cu_origin_y,
-                                blk_geom,
+                                tx_size,
                                 above_row,
                                 left_col,
                                 context_ptr);
                             //Distortion
-                            ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][blk_geom->bwidth >> 3]( // Always SAD without weighting
+                            ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][cuStatsPtr->size >> 3]( // Always SAD without weighting
                                 &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),
                                 input_ptr->stride_y,
                                 &(context_ptr->me_context_ptr->sb_buffer[0]),
                                 BLOCK_SIZE_64,
-                                blk_geom->bwidth,
-                                blk_geom->bheight);                            
+                                cuStatsPtr->size,
+                                cuStatsPtr->size);                            
                             //kepp track of best SAD
                             if (ois_blk_ptr[ois_intra_count].distortion < best_intra_ois_distortion) {
                                 best_intra_ois_index = ois_intra_count;
@@ -8278,16 +8278,9 @@ EbErrorType open_loop_intra_search_sb(
                     }
                 }                
                 ois_sb_results_ptr->best_distortion_index[pa_blk_index] = best_intra_ois_index;
-                ois_sb_results_ptr->total_ois_intra_candidate[pa_blk_index] = ois_intra_count;
-
-                if (blk_geom->sq_size > 8)            
-                    next_sq = 1;                
-                else 
-                    next_sq = 0;                
+                ois_sb_results_ptr->total_ois_intra_candidate[pa_blk_index] = ois_intra_count;        
             }
-
-            ep_blk_index += next_sq ? d1_depth_offset[sequence_control_set_ptr->sb_size == BLOCK_128X128][blk_geom->depth] : 
-                                   ns_depth_offset[sequence_control_set_ptr->sb_size == BLOCK_128X128][blk_geom->depth];
+            pa_blk_index ++;
         }
     return return_error;
 }

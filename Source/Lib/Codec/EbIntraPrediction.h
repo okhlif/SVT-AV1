@@ -383,7 +383,7 @@ extern "C" {
         uint8_t                          ois_intra_mode,
         uint32_t                         srcOriginX,
         uint32_t                         srcOriginY,
-        const  BlockGeom                *blk_geom,
+        TxSize                          tx_size,
         uint8_t                         *above_row,
         uint8_t                         *left_col,
         MotionEstimationContext_t       *context_ptr);                  // input parameter, ME context

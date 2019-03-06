@@ -656,7 +656,7 @@ void* MotionEstimationKernel(void *input_ptr)
 
                             //DOUBLE CHECK THIS PIECE OF CODE
 #if  OIS_BASED_INTRA
-                            bestOisCuIndex =  picture_control_set_ptr->ois_sb_results[sb_index]->best_distortion_index[ep_to_pa_block_index[0]];
+                            bestOisCuIndex =  picture_control_set_ptr->ois_sb_results[sb_index]->best_distortion_index[0];
                             intra_sad_interval_index = (uint32_t) ( picture_control_set_ptr->ois_sb_results[sb_index]->ois_candidate_array[0][bestOisCuIndex].distortion  >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) ;
 #else
                             intra_sad_interval_index = (uint32_t)
@@ -708,7 +708,7 @@ void* MotionEstimationKernel(void *input_ptr)
                             //DOUBLE CHECK THIS PIECE OF CODE
                             
 #if OIS_BASED_INTRA
-                            bestOisCuIndex =  picture_control_set_ptr->ois_sb_results[sb_index]->best_distortion_index[ep_to_pa_block_index[0]];
+                            bestOisCuIndex =  picture_control_set_ptr->ois_sb_results[sb_index]->best_distortion_index[0];
                             intra_sad_interval_index = (uint32_t) ( picture_control_set_ptr->ois_sb_results[sb_index]->ois_candidate_array[0][bestOisCuIndex].distortion  >> (12 - SAD_PRECISION_INTERVAL));//change 12 to 2*log2(64) ;
 #else
                             intra_sad_interval_index = (uint32_t)

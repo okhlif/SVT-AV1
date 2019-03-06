@@ -10212,7 +10212,7 @@ EbErrorType intra_prediction_open_loop(
         uint8_t                          ois_intra_mode,
         uint32_t                         src_origin_x,
         uint32_t                         src_origin_y,
-        const  BlockGeom                *blk_geom,
+        TxSize                          tx_size,
         uint8_t                         *above_row,
         uint8_t                         *left_col,
         MotionEstimationContext_t       *context_ptr)                  // input parameter, ME context
@@ -10225,14 +10225,14 @@ EbErrorType intra_prediction_open_loop(
     uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
 
     if (is_dr_mode) {
-        dr_predictor(dst, dst_stride, blk_geom->txsize[0], above_row, left_col, 0, 0, p_angle);         
+        dr_predictor(dst, dst_stride, tx_size, above_row, left_col, 0, 0, p_angle);         
     }
     else {
         // predict
         if (mode == DC_PRED) {
-            dc_pred[src_origin_x > 0][src_origin_y > 0][blk_geom->txsize[0]](dst, dst_stride, above_row, left_col);     
+            dc_pred[src_origin_x > 0][src_origin_y > 0][tx_size](dst, dst_stride, above_row, left_col);     
         } else {
-            pred[mode][blk_geom->txsize[0]](dst, dst_stride, above_row, left_col);
+            pred[mode][tx_size](dst, dst_stride, above_row, left_col);
         }
     }
     return return_error;
