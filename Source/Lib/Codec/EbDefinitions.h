@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
-#include "EbApi.h"
+#include "EbSvtAv1Enc.h"
 #ifdef _WIN32
 #define inline __inline
 #elif __GNUC__
@@ -164,6 +164,8 @@ extern "C" {
 #define TWO_FAST_LOOP                                   1
 #define ENABLE_EOB_ZERO_CHECK                           1
 #define DISABLE_128_SB_FOR_SUB_720                      1
+
+#define IMPROVE_CHROMA_MODE                  1
 
 /********************************************************/
 /****************** Pre-defined Values ******************/
@@ -2135,10 +2137,6 @@ typedef void(*EB_DTOR)(
 ***************************************/
 // Reserved types for lib's internal use. Must be less than EB_EXT_TYPE_BASE
 #define       EB_TYPE_PIC_TIMING_SEI         0
-#define       EB_TYPE_BUFFERING_PERIOD_SEI   1
-#define       EB_TYPE_RECOVERY_POINT_SEI     2
-#define       EB_TYPE_UNREG_USER_DATA_SEI    3
-#define       EB_TYPE_REG_USER_DATA_SEI      4
 #define       EB_TYPE_PIC_STRUCT             5             // It is a requirement (for the application) that if pictureStruct is present for 1 picture it shall be present for every picture
 #define       EB_TYPE_INPUT_PICTURE_DEF      6
 
