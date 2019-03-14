@@ -20,7 +20,7 @@
 #include "EbEncDecResults.h"
 #include "EbPictureDemuxResults.h"
 #include "EbCodingLoop.h"
-#include "EbSvtAv1ErrorCodes.h"
+#include "EbErrorCodes.h"
 #include "EbDeblockingFilter.h"
 #include "grainSynthesis.h"
 

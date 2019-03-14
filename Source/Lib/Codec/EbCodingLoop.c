@@ -24,7 +24,7 @@
 
 #include "EbModeDecisionProcess.h"
 #include "EbEncDecProcess.h"
-#include "EbSvtAv1ErrorCodes.h"
+#include "EbErrorCodes.h"
 #include "EbTransforms.h"
 #include "EbModeDecisionConfiguration.h"
 #include "EbIntraPrediction.h"

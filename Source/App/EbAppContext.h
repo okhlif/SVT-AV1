@@ -6,7 +6,7 @@
 #ifndef EbAppContext_h
 #define EbAppContext_h
 
-#include "EbSvtAv1Enc.h"
+#include "EbApi.h"
 #include "EbAppConfig.h"
 
 /***************************************
