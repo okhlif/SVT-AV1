@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
-#include "EbApi.h"
+#include "EbSvtAv1Enc.h"
 #ifdef _WIN32
 #define inline __inline
 #elif __GNUC__
@@ -164,8 +164,22 @@ extern "C" {
 #define TWO_FAST_LOOP                                   1
 #define ENABLE_EOB_ZERO_CHECK                           1
 #define DISABLE_128_SB_FOR_SUB_720                      1
+#define BASE_LAYER_REF                                  1 // Base layer pictures use the previous I slice as the second reference
+#if BASE_LAYER_REF
+#define MAX_FRAMES_TO_REF_I                             64
+#endif
+
+#define NSQ_OPTIMASATION                                1
+
+#if NSQ_OPTIMASATION
+#define NSQ_TAB_SIZE                                    6
+#endif
+
+#define IMPROVE_CHROMA_MODE                  1
 
 #define OIS_BASED_INTRA                               1
+#define IMPROVE_CHROMA_MODE                  1
+
 /********************************************************/
 /****************** Pre-defined Values ******************/
 /********************************************************/
@@ -514,6 +528,19 @@ typedef enum INTERPOLATION_SEARCH_LEVEL {
     IT_SEARCH_FULL_LOOP,
     IT_SEARCH_FAST_LOOP,
 } INTERPOLATION_SEARCH_LEVEL;
+
+#if NSQ_OPTIMASATION
+typedef enum NSQ_SEARCH_LEVEL {
+    NSQ_SEARCH_OFF,
+    NSQ_SEARCH_LEVEL1,
+    NSQ_SEARCH_LEVEL2,
+    NSQ_SEARCH_LEVEL3,
+    NSQ_SEARCH_LEVEL4,
+    NSQ_SEARCH_LEVEL5,
+    NSQ_SEARCH_LEVEL6,
+    NSQ_SEARCH_FULL
+} NSQ_SEARCH_LEVEL;
+#else
 typedef enum NSQ_SEARCH_LEVEL {
     NSQ_SEARCH_OFF,
     NSQ_SEARCH_BASE_ON_SQ_TYPE,
@@ -522,6 +549,7 @@ typedef enum NSQ_SEARCH_LEVEL {
     NSQ_INTER_SEARCH_BASE_ON_SQ_INTRAMODE,
     NSQ_SEARCH_FULL
 } NSQ_SEARCH_LEVEL;
+#endif
 #define MAX_PARENT_SQ     6
 typedef enum COMPOUND_DIST_WEIGHT_MODE {
     DIST,
@@ -2136,10 +2164,6 @@ typedef void(*EB_DTOR)(
 ***************************************/
 // Reserved types for lib's internal use. Must be less than EB_EXT_TYPE_BASE
 #define       EB_TYPE_PIC_TIMING_SEI         0
-#define       EB_TYPE_BUFFERING_PERIOD_SEI   1
-#define       EB_TYPE_RECOVERY_POINT_SEI     2
-#define       EB_TYPE_UNREG_USER_DATA_SEI    3
-#define       EB_TYPE_REG_USER_DATA_SEI      4
 #define       EB_TYPE_PIC_STRUCT             5             // It is a requirement (for the application) that if pictureStruct is present for 1 picture it shall be present for every picture
 #define       EB_TYPE_INPUT_PICTURE_DEF      6
 
