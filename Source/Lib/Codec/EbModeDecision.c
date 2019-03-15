@@ -477,11 +477,7 @@ void sort_fast_loop_candidates(
     uint8_t                        *sorted_candidate_index_array,
     uint64_t                       *ref_fast_cost) {
 
-    uint32_t fullCandidateIndex;
     uint32_t fullReconCandidateCount = context_ptr->full_recon_search_count;
-
-    uint32_t                          highestCostIndex;
-    uint64_t                          highestCost;
 
     //  move the scratch candidates (MAX_CU_COST) to the last spots (if any)
     uint32_t best_candidate_start_index = 0;

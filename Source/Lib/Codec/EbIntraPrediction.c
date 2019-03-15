@@ -8966,6 +8966,7 @@ static void build_intra_predictors(
         if (!disable_edge_filter) {
             const int32_t need_right = p_angle < 90;
             const int32_t need_bottom = p_angle > 180;
+#if !ICOPY
             uint32_t intraLeftMode;
             uint32_t intraTopMode;
             //const int32_t filt_type = get_filt_type(xd, plane);
@@ -8978,13 +8979,12 @@ static void build_intra_predictors(
                 intraLeftMode = intra_luma_left_mode;
                 intraTopMode = intra_luma_top_mode;
             }
-
             EbBool neighborAvailableLeft = (n_left_px == 0) ? EB_FALSE : // left picture boundary check
                 EB_TRUE;
 
             EbBool    neighborAvailableTop = (n_top_px == 0) ? EB_FALSE : // picture boundary check
                 EB_TRUE;
-
+#endif
 #if ICOPY
             const int32_t filt_type = get_filt_type(xd, plane);
 #else
@@ -9207,6 +9207,7 @@ static void build_intra_predictors_high(
         if (!disable_edge_filter) {
             const int32_t need_right = p_angle < 90;
             const int32_t need_bottom = p_angle > 180;
+#if !ICOPY
             uint32_t intraLeftMode;
             uint32_t intraTopMode;
 
@@ -9224,7 +9225,7 @@ static void build_intra_predictors_high(
 
             EbBool    neighborAvailableTop = (n_top_px == 0) ? EB_FALSE : // picture boundary check
                 EB_TRUE;
-
+#endif
             //const int32_t filt_type = get_filt_type(xd, plane);
 #if ICOPY
             const int32_t filt_type = get_filt_type(xd, plane);

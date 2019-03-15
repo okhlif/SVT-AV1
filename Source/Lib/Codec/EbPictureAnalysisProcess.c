@@ -4025,12 +4025,16 @@ void SetPictureParametersForStatisticsGathering(
 void PicturePreProcessingOperations(
     PictureParentControlSet_t       *picture_control_set_ptr,
     EbPictureBufferDesc_t           *input_picture_ptr,
+#if !SHUT_FULL_DENOISE
     PictureAnalysisContext_t        *context_ptr,
+#endif
     SequenceControlSet_t            *sequence_control_set_ptr,
     EbPictureBufferDesc_t           *quarter_decimated_picture_ptr,
     EbPictureBufferDesc_t           *sixteenth_decimated_picture_ptr,
     uint32_t                           sb_total_count,
+#if !SHUT_FULL_DENOISE
     uint32_t                           picture_width_in_sb,
+#endif
     EbAsm                           asm_type) {
 
     UNUSED(quarter_decimated_picture_ptr);
@@ -4998,12 +5002,16 @@ void* picture_analysis_kernel(void *input_ptr)
         PicturePreProcessingOperations(
             picture_control_set_ptr,
             input_picture_ptr,
+#if !SHUT_FULL_DENOISE
             context_ptr,
+#endif
             sequence_control_set_ptr,
             quarterDecimatedPicturePtr,
             sixteenthDecimatedPicturePtr,
             sb_total_count,
+#if !SHUT_FULL_DENOISE
             picture_width_in_sb,
+#endif
             asm_type);
 
         // Pad input picture to complete border LCUs
@@ -5034,11 +5042,12 @@ void* picture_analysis_kernel(void *input_ptr)
             input_picture_ptr->stride_y,
             sequence_control_set_ptr->luma_width, sequence_control_set_ptr->luma_height);       
  #if ADD_VAR_SC_DETECT
-        if (picture_control_set_ptr->sc_content_detected)
+        if (picture_control_set_ptr->sc_content_detected) {
             if (picture_control_set_ptr->pic_avg_variance > 1000)
                 picture_control_set_ptr->sc_content_detected = 1;
             else
                 picture_control_set_ptr->sc_content_detected = 0;
+        }
 #endif
 
 #endif

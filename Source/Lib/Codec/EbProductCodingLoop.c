@@ -659,8 +659,12 @@ void md_update_all_neighbour_arrays_multiple(
 #if ADAPTIVE_DEPTH_PARTITIONING
 void set_nfl(
     ModeDecisionContext_t     *context_ptr,
+#if M8_ADP    
+    PictureControlSet_t       *picture_control_set_ptr) {
+#else
     PictureControlSet_t       *picture_control_set_ptr,
     LargestCodingUnit_t       *sb_ptr) {
+#endif
 
     // Set NFL Candidates
     // NFL Level MD         Settings
@@ -3766,8 +3770,13 @@ void md_encode_block(
 #if ADAPTIVE_DEPTH_PARTITIONING
         set_nfl(
             context_ptr,
+#if M8_ADP
+            picture_control_set_ptr);
+#else
             picture_control_set_ptr,
             context_ptr->sb_ptr);
+#endif
+
 #else
         set_nfl(
             context_ptr,

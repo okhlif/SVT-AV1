@@ -19,8 +19,8 @@ EbErrorType pa_reference_queue_entry_ctor(
     entryPtr->referenceEntryIndex = 0;
     entryPtr->dependentCount = 0;
 #if BASE_LAYER_REF
-    entryPtr->list0Ptr = EB_MALLOC(ReferenceList_t*, entryPtr->list0Ptr, sizeof(ReferenceList_t), EB_N_PTR);
-    entryPtr->list1Ptr = EB_MALLOC(ReferenceList_t*, entryPtr->list1Ptr, sizeof(ReferenceList_t), EB_N_PTR);
+    EB_MALLOC(ReferenceList_t*, entryPtr->list0Ptr, sizeof(ReferenceList_t), EB_N_PTR);
+    EB_MALLOC(ReferenceList_t*, entryPtr->list1Ptr, sizeof(ReferenceList_t), EB_N_PTR);
     entryPtr->list0Ptr->referenceList = 0;
     entryPtr->list0Ptr->referenceListCount = 0;
     entryPtr->list1Ptr->referenceList = 0;

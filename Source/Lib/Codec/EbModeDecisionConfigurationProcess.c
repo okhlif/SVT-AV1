@@ -1952,8 +1952,9 @@ void  derive_optimal_budget_per_sb(
 EbErrorType derive_default_segments(
 #if M8_ADP
     SequenceControlSet_t               *sequence_control_set_ptr,
-#endif
+#else
     PictureControlSet_t                *picture_control_set_ptr,
+#endif
     ModeDecisionConfigurationContext_t *context_ptr){
 
     EbErrorType return_error = EB_ErrorNone;
@@ -2134,7 +2135,7 @@ void set_target_budget_oq(
 
             luminosity_change_boost = ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - ref_obj_l0->average_intensity);
             luminosity_change_boost += (ref_obj_l1 != EB_NULL) ? ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - ref_obj_l1->average_intensity) : 0;
-            luminosity_change_boost = CLIP3(0, MAX_LUMINOSITY_BOOST, luminosity_change_boost);
+            luminosity_change_boost = MAX(MAX_LUMINOSITY_BOOST, luminosity_change_boost);
         }
     }
 #if FASTER_M8_ADP
@@ -2239,8 +2240,9 @@ void derive_sb_md_mode(
     derive_default_segments(
 #if M8_ADP
         sequence_control_set_ptr,
-#endif
+#else
         picture_control_set_ptr,
+#endif
         context_ptr);
 #if !M8_ADP
     // Derive SB score

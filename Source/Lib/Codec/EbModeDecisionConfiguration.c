@@ -490,7 +490,9 @@ void RefinementPredictionLoop(
 
     MdcpLocalCodingUnit_t    *localCuArray         = context_ptr->localCuArray;
     SbParams_t               *sb_params            = &sequence_control_set_ptr->sb_params_array[sb_index];
+    #if !MDC_FIX_1
     uint32_t                  temporal_layer_index = picture_control_set_ptr->temporal_layer_index;
+#endif
     uint32_t                  cu_index             = 0;
 #if !MDC_FIX_1
     uint8_t                   stationary_edge_over_time_flag = (&(picture_control_set_ptr->parent_pcs_ptr->sb_stat_array[sb_index]))->stationary_edge_over_time_flag;
