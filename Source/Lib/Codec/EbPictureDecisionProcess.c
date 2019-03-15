@@ -722,6 +722,22 @@ EbErrorType signal_derivation_multi_processes_oq(
     // NSQ_SEARCH_LEVEL6                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 6 NSQ SHAPE
     // NSQ_SEARCH_FULL                                Allow NSQ Intra-FULL and Inter-FULL
 
+#if SCENE_CONTENT_SETTINGS
+    if (sc_content_detected) 
+        if (picture_control_set_ptr->enc_mode == ENC_M0) 
+            if (picture_control_set_ptr->slice_type == I_SLICE)
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
+            else
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_OFF;     
+        else if (picture_control_set_ptr->enc_mode <= ENC_M3) 
+            if (picture_control_set_ptr->slice_type == I_SLICE)
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
+            else
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_OFF;  
+        else
+            picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_OFF;
+    else
+#endif
     if (MR_MODE) 
         picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_FULL;
     else if (picture_control_set_ptr->enc_mode == ENC_M0)
