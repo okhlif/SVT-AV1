@@ -150,6 +150,17 @@ void* set_me_hme_params_oq(
     me_context_ptr->search_area_height = SearchAreaHeight[input_resolution][hmeMeLevel];
 #endif
 
+#if NADER
+    me_context_ptr->hme_level0_total_search_area_width = 96;
+    me_context_ptr->hme_level0_total_search_area_height = 48;
+    me_context_ptr->hme_level0_search_area_in_width_array[0] = 48;
+    me_context_ptr->hme_level0_search_area_in_width_array[1] = 48;
+    me_context_ptr->hme_level0_search_area_in_height_array[0] = 24;
+    me_context_ptr->hme_level0_search_area_in_height_array[1] = 24;
+    me_context_ptr->search_area_width = 16;
+    me_context_ptr->search_area_height = 8;
+#endif
+
     me_context_ptr->update_hme_search_center_flag = 1;
 
     if (input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) 

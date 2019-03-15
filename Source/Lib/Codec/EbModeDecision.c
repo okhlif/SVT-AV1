@@ -3123,7 +3123,11 @@ void  inject_intra_candidates(
 #endif
     uint8_t                     intra_mode_start = DC_PRED;
 #if ENABLE_PAETH
+#if NADER
+    uint8_t                     intra_mode_end = DC_PRED;
+#else
     uint8_t                     intra_mode_end   = is16bit ? SMOOTH_H_PRED : PAETH_PRED;
+#endif
 #else    
     uint8_t                     intra_mode_end   = SMOOTH_H_PRED;
 #endif

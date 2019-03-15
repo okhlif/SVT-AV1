@@ -2164,6 +2164,10 @@ void set_target_budget_oq(
 #endif
     //printf("picture_number = %d\tsb_average_score = %d\n", picture_control_set_ptr->picture_number, budget_per_sb);
     budget = sequence_control_set_ptr->sb_tot_cnt * budget_per_sb;
+
+#if NADER
+    budget = sequence_control_set_ptr->sb_tot_cnt * 100;
+#endif
 #else
 
 

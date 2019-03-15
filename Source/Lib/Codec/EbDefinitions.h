@@ -35,7 +35,7 @@
 extern "C" {
 #endif
     
-
+#define NADER 1
      //Mode definition : Only one mode should be ON at a time
 
 #define QUICK_ME_CLEANUP        1
@@ -192,7 +192,11 @@ extern "C" {
 #endif
 #define ENABLE_EOB_ZERO_CHECK                           1
 #define DISABLE_128_SB_FOR_SUB_720                      1
+#if NADER 
+#define BASE_LAYER_REF                                  0 
+#else
 #define BASE_LAYER_REF                                  1 // Base layer pictures use the previous I slice as the second reference
+#endif
 #if BASE_LAYER_REF
 #define MAX_FRAMES_TO_REF_I                             64
 #endif
@@ -210,7 +214,7 @@ extern "C" {
 #define SHUT_FULL_DENOISE                               1
 
 
-#define ICOPY       1 //Intra Block Copy
+#define ICOPY       0 //Intra Block Copy
 
 #if ICOPY
 #define IBC_EARLY_0 1
@@ -231,6 +235,8 @@ extern "C" {
 #define SC_HME_ME  0//use sc detector for hme/me setting
 
 #define AOM_INTERP_EXTEND 4
+
+
 struct buf_2d {
     uint8_t *buf;
     uint8_t *buf0;

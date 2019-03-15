@@ -190,7 +190,7 @@ EbErrorType eb_sequence_control_set_ctor(
 
     sequence_control_set_ptr->enable_ref_frame_mvs = 1;
     sequence_control_set_ptr->enable_superres = 0;
-#if NO_ENCDEC || SHUT_FILTERING
+#if NO_ENCDEC || SHUT_FILTERING || NADER
     sequence_control_set_ptr->enable_cdef = 0;
 
     sequence_control_set_ptr->enable_restoration = 0;

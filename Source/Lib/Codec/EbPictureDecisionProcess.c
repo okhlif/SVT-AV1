@@ -979,6 +979,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         cm->wn_filter_mode = 0;
 #endif
 
+
     // Tx_search Level                                Settings
     // 0                                              OFF
     // 1                                              Tx search at encdec
@@ -1044,7 +1045,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         picture_control_set_ptr->skip_tx_search = 0;
     else
         picture_control_set_ptr->skip_tx_search = 1;
-
+#if NADER
+    picture_control_set_ptr->tx_search_level = 0;
+#endif
     // Intra prediction modes                       Settings
     // 0                                            FULL  
     // 1                                            LIGHT per block : disable_z2_prediction && disable_angle_refinement  for 64/32/4
@@ -2311,7 +2314,11 @@ void* picture_decision_kernel(void *input_ptr)
                                 picture_control_set_ptr);
 
                             // Set the default settings of  subpel
+#if NADER
+                            picture_control_set_ptr->use_subpel_flag = 0;
+#else
                             picture_control_set_ptr->use_subpel_flag = 1;
+#endif
 #if !CHROMA_BLIND
                             // Set the default settings of  chroma
                             picture_control_set_ptr->chroma_mode = PictureLevelChromaSettings(
