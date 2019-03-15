@@ -6655,17 +6655,6 @@ EbErrorType MotionEstimateLcu(
     EbBool                    enableQuarterPel = EB_FALSE;
     EbBool                 oneQuadrantHME =  EB_FALSE;
 
-#if M0_SAD_HALF_QUARTER_PEL_BIPRED_SEARCH || M0_SSD_HALF_QUARTER_PEL_BIPRED_SEARCH
-#if M0_SSD_HALF_QUARTER_PEL_BIPRED_SEARCH
-#if SCENE_CONTENT_SETTINGS
-    context_ptr->fractionalSearchMethod = (picture_control_set_ptr->enc_mode >= ENC_M7 || picture_control_set_ptr->sc_content_detected) ? FULL_SAD_SEARCH : SSD_SEARCH;
-#else
-    context_ptr->fractionalSearchMethod = (picture_control_set_ptr->enc_mode >= ENC_M7) ? FULL_SAD_SEARCH : SSD_SEARCH;
-#endif
-#else
-    context_ptr->fractionalSearchMethod = SUB_SAD_SEARCH;
-#endif
-#endif
 #if M0_64x64_32x32_HALF_QUARTER_PEL
     context_ptr->fractional_search64x64 = EB_TRUE;
 #endif

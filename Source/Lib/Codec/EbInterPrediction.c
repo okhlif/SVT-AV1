@@ -3485,9 +3485,8 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
     //int32_t plane,
     int64_t sse,
     int32_t *rate,
-    int64_t *dist
-)
-{
+    int64_t *dist){
+
     // OMK
   //const struct MacroblockdPlane *const pd = &xd->plane[plane];
     int32_t dequant_shift = 3;
@@ -4577,11 +4576,13 @@ EbErrorType inter_pu_prediction_av1(
         return return_error;
     }
 
+    uint16_t capped_size = md_context_ptr->interpolation_filter_search_blk_size == 0 ? 4 : 
+                           md_context_ptr->interpolation_filter_search_blk_size == 1 ? 8 : 16 ;
     if (is16bit) {
 #if INTERPOL_FILTER_SEARCH_10BIT_SUPPORT
         candidate_buffer_ptr->candidate_ptr->interp_filters = 0;
         if (!md_context_ptr->skip_interpolation_search) {
-            if (md_context_ptr->blk_geom->bwidth > 4 && md_context_ptr->blk_geom->bheight > 4)
+            if (md_context_ptr->blk_geom->bwidth > capped_size && md_context_ptr->blk_geom->bheight > capped_size)
                 interpolation_filter_search_HBD(
                     picture_control_set_ptr,
                     candidate_buffer_ptr->predictionPtrTemp,
@@ -4628,7 +4629,7 @@ EbErrorType inter_pu_prediction_av1(
     } else {
         candidate_buffer_ptr->candidate_ptr->interp_filters = 0;
         if (!md_context_ptr->skip_interpolation_search) {
-            if (md_context_ptr->blk_geom->bwidth > 4 && md_context_ptr->blk_geom->bheight > 4)
+            if (md_context_ptr->blk_geom->bwidth > capped_size && md_context_ptr->blk_geom->bheight > capped_size)
                 interpolation_filter_search(
                     picture_control_set_ptr,
                     candidate_buffer_ptr->predictionPtrTemp,
