@@ -268,10 +268,6 @@ Calcualte the best SAD from Rect H, V and H4, V4 partitions
 and return the best partition index
 ***********************************************************/
 void nsq_me_analysis(
-    uint32_t  *p_sad8x8,
-    uint32_t  *p_sad16x16,
-    uint32_t  *p_sad32x32,
-    uint32_t  *p_sad64x64,
     uint32_t  *p_sad64x32,
     uint32_t  *p_sad32x16,
     uint32_t  *p_sad16x8,
@@ -288,13 +284,8 @@ void nsq_me_analysis(
     uint8_t   *p_nsq_8x8){
 
     uint32_t sad[BLK_NUM];// sad_N, sad_H, sad_V, sad_H4, sad_V4, sad_S;
-    uint32_t sad_16x8[32];
-    uint32_t sad_8x16[32];
-    uint32_t sad_32x16[8];
-    uint32_t sad_16x32[8];
     uint32_t best_nsq_sad;
     uint8_t  nsq_index;
-    uint8_t  best_nsq_index = 0;
     /*64x64*/
     //sad[0] = p_sad64x64;
     sad[1] = p_sad64x32[0] + p_sad64x32[1];
@@ -1419,10 +1410,7 @@ static EB_EXTSADCALCULATION_TYPE ExtSadCalculation_funcPtrArray[ASM_TYPE_TOTAL] 
 static void nsq_get_analysis_results_block(
     MeContext_t             *context_ptr) {
 
-    uint32_t  *p_best_sad8x8 = context_ptr->p_best_sad8x8;
-    uint32_t  *p_best_sad16x16 = context_ptr->p_best_sad16x16;
-    uint32_t  *p_best_sad32x32 = context_ptr->p_best_sad32x32;
-    uint32_t  *p_best_sad64x64 = context_ptr->p_best_sad64x64;
+
     uint32_t  *p_best_sad64x32 = context_ptr->p_best_sad64x32;
     uint32_t  *p_best_sad32x16 = context_ptr->p_best_sad32x16;
     uint32_t  *p_best_sad16x8 = context_ptr->p_best_sad16x8;
@@ -1439,10 +1427,6 @@ static void nsq_get_analysis_results_block(
     uint8_t  *p_best_nsq_8x8 = context_ptr->p_best_nsq8x8;
 
     nsq_me_analysis(
-        p_best_sad8x8,
-        p_best_sad16x16,
-        p_best_sad32x32,
-        p_best_sad64x64,
         p_best_sad64x32,
         p_best_sad32x16,
         p_best_sad16x8,

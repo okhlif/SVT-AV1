@@ -3172,8 +3172,8 @@ void  inject_intra_candidates(
     disable_angle_prediction    = 0;
 #endif
     angleDeltaCandidateCount = disable_angle_refinement ? 1: angleDeltaCandidateCount;
-    uint8_t sq_index = LOG2F(context_ptr->blk_geom->sq_size) - 2;
 #if !NSQ_OPTIMASATION
+    uint8_t sq_index = LOG2F(context_ptr->blk_geom->sq_size) - 2;
     if (picture_control_set_ptr->parent_pcs_ptr->nsq_search_level == NSQ_INTER_SEARCH_BASE_ON_SQ_INTRAMODE) {
         disable_z2_prediction = context_ptr->blk_geom->shape == PART_N ? disable_z2_prediction :
             context_ptr->parent_sq_type[sq_index] == INTRA_MODE ? disable_z2_prediction : 0;
