@@ -5040,7 +5040,7 @@ void* picture_analysis_kernel(void *input_ptr)
             else
                 picture_control_set_ptr->sc_content_detected = 0;
 #endif
-       // picture_control_set_ptr->sc_content_detected = 0;
+
 #endif
         // Hold the 64x64 variance and mean in the reference frame
         uint32_t sb_index;
