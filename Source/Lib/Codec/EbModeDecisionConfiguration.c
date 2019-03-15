@@ -279,6 +279,8 @@ EbErrorType MdcRefinement(
 
     return return_error;
 }
+
+#if !OPEN_LOOP_EARLY_PARTITION
 /*******************************************
 Cost Computation for intra CU
 *******************************************/
@@ -430,7 +432,7 @@ uint64_t MdcInterCuRate(
     return rate;
 }
 
-
+#endif
 /*******************************************
 Derive the contouring class
 If (AC energy < 32 * 32) then apply aggressive action (Class 1),
@@ -536,7 +538,11 @@ void RefinementPredictionLoop(
 #endif    
             {
 #if ADAPTIVE_DEPTH_PARTITIONING
+#if M8_ADP
+                if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_DEPTH_MODE) {
+#else
                 if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && (picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_DEPTH_MODE || picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)) {
+#endif
 #else
                 if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && (picture_control_set_ptr->parent_pcs_ptr->sb_md_mode_array[sb_index] == LCU_PRED_OPEN_LOOP_DEPTH_MODE || picture_control_set_ptr->parent_pcs_ptr->sb_md_mode_array[sb_index] == LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)) {
 #endif
@@ -545,7 +551,16 @@ void RefinementPredictionLoop(
                 else
 
 #if MDC_FIX_1
+#if M8_ADP
+                    if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_FAST_OPEN_LOOP_DEPTH_MODE) {
+                        refinementLevel = ndp_level_1[depth];
+                    }
+                    else  { // SB_OPEN_LOOP_DEPTH_MODE
+                        refinementLevel = ndp_level_0[depth];
+                    }
+#else
                     refinementLevel = NdpRefinementControl[temporal_layer_index][depth];
+#endif
 #else
                     if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_OPEN_LOOP_DEPTH_MODE ||
 #if ADAPTIVE_DEPTH_PARTITIONING
@@ -1132,7 +1147,9 @@ void PredictionPartitionLoop(
                     context_ptr->mdc_candidate_ptr->md_rate_estimation_ptr = context_ptr->md_rate_estimation_ptr;
                     context_ptr->mdc_candidate_ptr->type = INTER_MODE;
                     context_ptr->mdc_candidate_ptr->merge_flag = EB_FALSE;
+#if !INTRA_INTER_FAST_LOOP
                     context_ptr->mdc_candidate_ptr->merge_index = 0;
+#endif
 #if MDC_FIX_1
                     context_ptr->mdc_candidate_ptr->prediction_direction[0] = (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0) ?
                         UNI_PRED_LIST_0 :
@@ -1140,7 +1157,9 @@ void PredictionPartitionLoop(
 #else
                     context_ptr->mdc_candidate_ptr->prediction_direction[0] = UNI_PRED_LIST_0;
 #endif
+#if !INTRA_INTER_FAST_LOOP
                     context_ptr->mdc_candidate_ptr->is_skip_mode_flag = 0;
+#endif
                     // Hsan: what's the best mode for rate simulation
 #if MDC_FIX_1
                     context_ptr->mdc_candidate_ptr->inter_mode = NEARESTMV;
@@ -1203,6 +1222,9 @@ void PredictionPartitionLoop(
                         mePuResult->distortionDirection[0].distortion,
                         (uint64_t) 0,
                         context_ptr->lambda,
+#if USE_SSE_FL
+                        0,
+#endif
                         picture_control_set_ptr,
                         context_ptr->mdc_ref_mv_stack,
                         context_ptr->blk_geom,

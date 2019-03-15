@@ -393,6 +393,9 @@ static void ResetEncDec(
 
         // Initial Rate Estimatimation of the Motion vectors
         av1_estimate_mv_rate(
+#if ICOPY
+            picture_control_set_ptr,
+#endif
             md_rate_estimation_array,
             &picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc->nmvc);
 
@@ -1350,14 +1353,33 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 1                    10
     // 2                    8
     // 3                    6
-    // 4                    4/3/2
+    // 4                    6 Intra/4 ref/3 non-ref
+#if SCENE_CONTENT_SETTINGS
+    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
+        
+        if (picture_control_set_ptr->enc_mode == ENC_M0)
+            context_ptr->nfl_level = 0;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M3)
+            context_ptr->nfl_level = 2;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M7)
+            context_ptr->nfl_level = 3;
+        else
+            context_ptr->nfl_level = 4;
+
+    }
+    else {
+#endif
     if (picture_control_set_ptr->enc_mode <= ENC_M1)
         context_ptr->nfl_level = 0;
     else if (picture_control_set_ptr->enc_mode <= ENC_M3)
         context_ptr->nfl_level = 2;
-    else
+    else if(picture_control_set_ptr->enc_mode <= ENC_M7)
         context_ptr->nfl_level = 3;
-
+    else
+        context_ptr->nfl_level = 4;
+#if SCENE_CONTENT_SETTINGS
+    }
+#endif
 #if CHROMA_BLIND
     // Set Chroma Mode
     // Level                Settings
@@ -1371,6 +1393,93 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             CHROMA_MODE_1 :
             CHROMA_MODE_2 ;
 #endif
+#if INTRA_INTER_FAST_LOOP
+    // Set the search method when decoupled fast loop is used 
+    // Hsan: FULL_SAD_SEARCH not supported
+    if (picture_control_set_ptr->enc_mode <= ENC_M0)
+        context_ptr->decoupled_fast_loop_search_method = SSD_SEARCH;
+    else
+        context_ptr->decoupled_fast_loop_search_method = FULL_SAD_SEARCH;
+#endif
+#if FULL_LOOP_ESCAPE
+    // Set the full loop escape level
+    // Level                Settings
+    // 0                    Off
+    // 1                    On but only INTRA
+    // 2                    On both INTRA and INTER
+    if (picture_control_set_ptr->enc_mode <= ENC_M7)
+        context_ptr->full_loop_escape = 0;
+    else
+        context_ptr->full_loop_escape = 1;
+
+#endif
+#if SHUT_GLOBAL_MV
+    // Set global MV injection
+    // Level                Settings
+    // 0                    Injection off (Hsan: but not derivation as used by MV ref derivation)
+    // 1                    On
+    if (picture_control_set_ptr->enc_mode <= ENC_M7)
+        context_ptr->global_mv_injection = 1;
+    else
+        context_ptr->global_mv_injection = 0;
+#endif
+    
+    // Set warped motion injection
+    // Level                Settings
+    // 0                    OFF
+    // 1                    On
+#if SCENE_CONTENT_SETTINGS
+    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) 
+        if (picture_control_set_ptr->enc_mode == ENC_M0)
+            context_ptr->warped_motion_injection = 1;
+        else
+            context_ptr->warped_motion_injection = 0;
+    else
+
+#endif
+    if (picture_control_set_ptr->enc_mode <= ENC_M1)
+        context_ptr->warped_motion_injection = 1;
+    else
+        context_ptr->warped_motion_injection = 0;
+
+    
+    // Set unipred3x3 injection
+    // Level                Settings
+    // 0                    OFF
+    // 1                    On
+#if SCENE_CONTENT_SETTINGS
+    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+        if (picture_control_set_ptr->enc_mode == ENC_M0)
+            context_ptr->unipred3x3_injection = 1;
+        else
+            context_ptr->unipred3x3_injection = 0;
+    else
+
+#endif
+    if (picture_control_set_ptr->enc_mode <= ENC_M1)
+        context_ptr->unipred3x3_injection = 1;
+    else
+        context_ptr->unipred3x3_injection = 0;
+
+    
+    // Set bipred3x3 injection
+    // Level                Settings
+    // 0                    OFF
+    // 1                    On
+#if SCENE_CONTENT_SETTINGS
+    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+        if (picture_control_set_ptr->enc_mode == ENC_M0)
+            context_ptr->bipred3x3_injection = 1;
+        else
+            context_ptr->bipred3x3_injection = 0;
+    else
+
+#endif
+    if (picture_control_set_ptr->enc_mode <= ENC_M1)
+        context_ptr->bipred3x3_injection = 1;
+    else
+        context_ptr->bipred3x3_injection = 0;
+
 
     return return_error;
 }
@@ -1493,6 +1602,12 @@ void* EncDecKernel(void *input_ptr)
                 picture_control_set_ptr,
                 sequence_control_set_ptr,
                 segment_index);
+
+#if M8_ADP
+            if (picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr != NULL) {
+                ((EbReferenceObject_t  *)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->average_intensity = picture_control_set_ptr->parent_pcs_ptr->average_intensity[0];
+            }
+#endif
 
             if (sequence_control_set_ptr->static_config.improve_sharpness) {
                 QpmDeriveWeightsMinAndMax(
