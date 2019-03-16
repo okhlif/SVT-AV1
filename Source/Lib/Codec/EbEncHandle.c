@@ -2725,7 +2725,7 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->source_width = 0;
     config_ptr->source_height = 0;
     config_ptr->frames_to_be_encoded = 0; 
-    config_ptr->stat_report = 1;
+    config_ptr->stat_report = 0;
 #if TILES
     config_ptr->tile_rows = 0;
     config_ptr->tile_columns = 0;
