@@ -848,6 +848,7 @@ static int full_pixel_exhaustive(PictureControlSet_t *pcs, IntraBcContext  *x,
                                  int *cost_list,
                                  const aom_variance_fn_ptr_t *fn_ptr,
                                  const MV *ref_mv, MV *dst_mv) {
+    UNUSED(cost_list);
     const SPEED_FEATURES *const sf = &pcs->sf;// cpi->sf;
   MV temp_mv = { centre_mv_full->row, centre_mv_full->col };
   MV f_ref_mv = { ref_mv->row >> 3, ref_mv->col >> 3 };
@@ -981,6 +982,9 @@ int av1_full_pixel_search(PictureControlSet_t *pcs, IntraBcContext  *x, block_si
                           int run_mesh_search, int error_per_bit,
                           int *cost_list, const MV *ref_mv, int var_max, int rd,
                           int x_pos, int y_pos, int intra) {
+    UNUSED (run_mesh_search);
+    UNUSED (var_max);
+    UNUSED (rd);
 
 #if IBC_MODES
     int32_t ibc_shift = 0;

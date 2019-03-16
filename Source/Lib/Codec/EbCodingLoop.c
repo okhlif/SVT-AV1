@@ -40,10 +40,12 @@ extern void av1_predict_intra_block(
     ModeDecisionContext_t                  *md_context_ptr,
 #endif
     STAGE                       stage,
+    #if !ICOPY
     uint8_t                     intra_luma_left_mode,
     uint8_t                     intra_luma_top_mode,
     uint8_t                     intra_chroma_left_mode,
     uint8_t                     intra_chroma_top_mode,
+#endif
     const BlockGeom            *blk_geom,
     const Av1Common *cm,
     int32_t wpx,
@@ -73,7 +75,9 @@ void av1_predict_intra_block_16bit(
     TileInfo               *tile,
 #endif
     EncDecContext_t         *context_ptr,
+    #if !ICOPY
     CodingUnit_t *cu_ptr,
+#endif
     const Av1Common *cm,
     int32_t wpx,
     int32_t hpx,
@@ -3467,7 +3471,9 @@ EB_EXTERN void AV1EncodePass(
                                         &sb_ptr->tile_info,
 #endif
                                         context_ptr,
+                                        #if !ICOPY
                                         cu_ptr,
+#endif
                                         picture_control_set_ptr->parent_pcs_ptr->av1_cm,                  //const Av1Common *cm,
                                         plane ? blk_geom->bwidth_uv : blk_geom->bwidth,                  //int32_t wpx,
                                         plane ? blk_geom->bheight_uv : blk_geom->bheight,                  //int32_t hpx,
@@ -3547,10 +3553,12 @@ EB_EXTERN void AV1EncodePass(
                                         NULL,
 #endif
                                         ED_STAGE,
+                                        #if !ICOPY
                                         cu_ptr->prediction_unit_array[0].intra_luma_left_mode,
                                         cu_ptr->prediction_unit_array[0].intra_luma_top_mode,
                                         cu_ptr->prediction_unit_array[0].intra_chroma_left_mode,
                                         cu_ptr->prediction_unit_array[0].intra_chroma_top_mode,
+#endif
                                         context_ptr->blk_geom,
                                         picture_control_set_ptr->parent_pcs_ptr->av1_cm,                  //const Av1Common *cm,
                                         plane ? blk_geom->bwidth_uv : blk_geom->bwidth,                   //int32_t wpx,

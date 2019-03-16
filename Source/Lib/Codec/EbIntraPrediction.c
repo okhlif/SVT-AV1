@@ -8791,11 +8791,12 @@ static void build_intra_predictors(
     ModeDecisionContext_t                  *md_context_ptr,
     STAGE       stage,
 #endif
+    #if !ICOPY
     uint8_t    intra_luma_left_mode,
     uint8_t    intra_luma_top_mode,
     uint8_t    intra_chroma_left_mode,
     uint8_t    intra_chroma_top_mode,
-
+#endif
 #if !INTRA_CORE_OPT
     const MacroBlockD *xd,
 #endif
@@ -9048,7 +9049,9 @@ static void build_intra_predictors(
 }
 #if INTRA_10BIT_SUPPORT
 static void build_intra_predictors_high(
+    #if !ICOPY
     CodingUnit_t            *cu_ptr,
+#endif
     const MacroBlockD *xd,
     uint16_t* topNeighArray, // int8_t
     uint16_t* leftNeighArray, // int8_t
@@ -9492,10 +9495,12 @@ extern void av1_predict_intra_block(
     ModeDecisionContext_t                  *md_context_ptr,
 #endif
     STAGE       stage,
+    #if !ICOPY
     uint8_t    intra_luma_left_mode,
     uint8_t    intra_luma_top_mode,
     uint8_t    intra_chroma_left_mode,
     uint8_t    intra_chroma_top_mode,
+#endif
     const BlockGeom            * blk_geom,
     const Av1Common *cm,
     int32_t wpx,
@@ -9855,10 +9860,12 @@ extern void av1_predict_intra_block(
         md_context_ptr,
         stage,
 #endif
+        #if !ICOPY
         intra_luma_left_mode,
         intra_luma_top_mode,
         intra_chroma_left_mode,
         intra_chroma_top_mode,
+#endif
 #if !INTRA_CORE_OPT
         xd,
 #endif
@@ -9880,7 +9887,9 @@ void av1_predict_intra_block_16bit(
     TileInfo * tile,
 #endif
     EncDecContext_t         *context_ptr,
+    #if !ICOPY
     CodingUnit_t *cu_ptr,
+#endif
     const Av1Common *cm,
     int32_t wpx,
     int32_t hpx,
@@ -10121,7 +10130,9 @@ void av1_predict_intra_block_16bit(
 #endif
 
     build_intra_predictors_high(
+        #if !ICOPY
         cu_ptr,
+#endif
         xd,
         topNeighArray,
         leftNeighArray,
@@ -10257,10 +10268,12 @@ EbErrorType AV1IntraPredictionCL(
             md_context_ptr,
 #endif
             MD_STAGE,
+            #if !ICOPY
             md_context_ptr->intra_luma_left_mode,
             md_context_ptr->intra_luma_top_mode,
             md_context_ptr->intra_chroma_left_mode,
             md_context_ptr->intra_chroma_top_mode,
+#endif
             md_context_ptr->blk_geom,
             picture_control_set_ptr->parent_pcs_ptr->av1_cm,                                      //const Av1Common *cm,
             plane ? md_context_ptr->blk_geom->bwidth_uv : md_context_ptr->blk_geom->bwidth,          //int32_t wpx,

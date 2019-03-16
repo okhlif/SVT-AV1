@@ -399,6 +399,7 @@ int av1_hash_is_vertical_perfect(const Yv12BufferConfig *picture,
 void av1_get_block_hash_value(uint8_t *y_src, int stride, int block_size,
                               uint32_t *hash_value1, uint32_t *hash_value2,
                               int use_highbitdepth, struct PictureControlSet_s * pcs, IntraBcContext  *x) {
+  UNUSED (pcs);
   uint32_t to_hash[4];
   const int add_value = hash_block_size_to_index(block_size) << crc_bits;
   assert(add_value >= 0);
