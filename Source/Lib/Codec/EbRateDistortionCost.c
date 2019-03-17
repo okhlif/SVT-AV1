@@ -521,6 +521,24 @@ uint64_t av1_cost_coeffs_txb(
     }
     return cost;
 }
+    extern /*static*/ void model_rd_for_sb(
+
+    PictureControlSet_t *picture_control_set_ptr,
+    EbPictureBufferDesc_t *prediction_ptr,
+    ModeDecisionContext_t *md_context_ptr,
+    //const AV1_COMP *const cpi,
+    //block_size bsize,
+    //Macroblock *x,
+    //MacroBlockD *xd,
+    int32_t plane_from,
+    int32_t plane_to,
+    int32_t *out_rate_sum,
+    int64_t *out_dist_sum,
+    int32_t *skip_txfm_sb,
+    int64_t *skip_sse_sb,
+    int32_t *plane_rate,
+    int64_t *plane_sse,
+    int64_t *plane_dist);
 
 #if REST_FAST_RATE_EST
 uint64_t av1_intra_fast_cost(

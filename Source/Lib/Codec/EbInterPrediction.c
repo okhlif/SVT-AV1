@@ -3514,7 +3514,7 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
     *dist <<= 4;
 }
 
-/*static*/ void model_rd_for_sb(
+extern /*static*/ void model_rd_for_sb(
 
     PictureControlSet_t *picture_control_set_ptr,
     EbPictureBufferDesc_t *prediction_ptr,
