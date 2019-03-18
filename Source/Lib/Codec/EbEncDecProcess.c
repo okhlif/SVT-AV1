@@ -1354,6 +1354,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 2                    8
     // 3                    6
     // 4                    6 Intra/4 ref/3 non-ref
+#if M9_NFL
+    // 5                    3
+#endif
 #if SCENE_CONTENT_SETTINGS
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
         
@@ -1388,8 +1391,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->nfl_level = 3;
     else if(picture_control_set_ptr->enc_mode <= ENC_M7)
         context_ptr->nfl_level = 3;
+#if M9_NFL
+    else if (picture_control_set_ptr->enc_mode <= ENC_M8)
+        context_ptr->nfl_level = 4;
+    else 
+        context_ptr->nfl_level = 5;
+#else
     else
         context_ptr->nfl_level = 4;
+#endif
 #if SCENE_CONTENT_SETTINGS
     }
 #endif

@@ -2318,7 +2318,20 @@ void* picture_decision_kernel(void *input_ptr)
                                 picture_control_set_ptr);
 
                             // Set the default settings of  subpel
+#if M9_SUBPEL
+                            if (picture_control_set_ptr->sc_content_detected)
+                                picture_control_set_ptr->use_subpel_flag = 1;
+                            else {
+                                if (picture_control_set_ptr->enc_mode <= ENC_M8)
+                                    picture_control_set_ptr->use_subpel_flag = 1;
+                                else
+                                    picture_control_set_ptr->use_subpel_flag = (picture_control_set_ptr->temporal_layer_index == 0) ?
+                                    1 :
+                                    0;
+                            }
+#else
                             picture_control_set_ptr->use_subpel_flag = 1;
+#endif
 #if !CHROMA_BLIND
                             // Set the default settings of  chroma
                             picture_control_set_ptr->chroma_mode = PictureLevelChromaSettings(

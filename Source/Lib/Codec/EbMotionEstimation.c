@@ -6640,7 +6640,18 @@ EbErrorType MotionEstimateLcu(
     EbBool                 oneQuadrantHME =  EB_FALSE;
 
 #if M0_64x64_32x32_HALF_QUARTER_PEL
+#if M9_FRAC_ME_SEARCH_64x64
+    if (picture_control_set_ptr->sc_content_detected)
+        context_ptr->fractional_search64x64 = EB_TRUE;
+    else {
+        if (picture_control_set_ptr->enc_mode <= ENC_M8)
+            context_ptr->fractional_search64x64 = EB_TRUE;
+        else
+            context_ptr->fractional_search64x64 = EB_FALSE;
+    }
+#else
     context_ptr->fractional_search64x64 = EB_TRUE;
+#endif
 #endif
     oneQuadrantHME = sequence_control_set_ptr->input_resolution < INPUT_SIZE_4K_RANGE ? 0 : oneQuadrantHME;
 #if M0_ME_SEARCH_BASE
