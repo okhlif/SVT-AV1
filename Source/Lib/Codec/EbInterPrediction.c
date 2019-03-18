@@ -3483,9 +3483,9 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
     //const MacroBlockD *const xd,
     //block_size bsize,
     //int32_t plane,
-    int64_t sse,
-    int32_t *rate,
-    int64_t *dist){
+    uint64_t sse,
+    uint32_t *rate,
+    uint64_t *dist){
 
     // OMK
   //const struct MacroblockdPlane *const pd = &xd->plane[plane];
@@ -3538,9 +3538,9 @@ extern /*static*/ void model_rd_for_sb(
     int32_t plane;
     // const int32_t ref = xd->mi[0]->ref_frame[0];
 
-    int64_t rate_sum = 0;
-    int64_t dist_sum = 0;
-    int64_t total_sse = 0;
+    uint64_t rate_sum = 0;
+    uint64_t dist_sum = 0;
+    uint64_t total_sse = 0;
 
 
     EbPictureBufferDesc_t                  *input_picture_ptr = picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr;
@@ -3552,9 +3552,9 @@ extern /*static*/ void model_rd_for_sb(
          // struct MacroblockdPlane *const pd = &xd->plane[plane];
          // const block_size bs = get_plane_block_size(bsize, pd);
         uint32_t sse;
-        int32_t rate;
+        uint32_t rate;
 
-        int64_t dist;
+        uint64_t dist;
 
         // if (x->skip_chroma_rd && plane) continue;
 
@@ -3594,9 +3594,9 @@ extern /*static*/ void model_rd_for_sb(
 
         rate_sum += rate;
         dist_sum += dist;
-        if (plane_rate) plane_rate[plane] = rate;
-        if (plane_sse) plane_sse[plane] = sse;
-        if (plane_dist) plane_dist[plane] = dist;
+        if (plane_rate) plane_rate[plane] = (int)rate;
+        if (plane_sse) plane_sse[plane] = (int)sse;
+        if (plane_dist) plane_dist[plane] = (int)dist;
     }
 
     *skip_txfm_sb = total_sse == 0;
