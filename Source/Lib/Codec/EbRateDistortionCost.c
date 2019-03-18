@@ -694,9 +694,9 @@ EbErrorType av1_intra_fast_cost(
     PredictionMode intra_mode = (PredictionMode)candidate_buffer_ptr->candidate_ptr->pred_mode;
 #endif
     // Luma and chroma rate
-    uint64_t rate;
-    uint64_t lumaRate = 0;
-    uint64_t chromaRate = 0;
+    uint32_t rate;
+    uint32_t lumaRate = 0;
+    uint32_t chromaRate = 0;
     uint64_t lumaSad, chromaSad;
 
     // Luma and chroma distortion
@@ -1216,8 +1216,8 @@ EbErrorType av1_inter_fast_cost(
     ModeDecisionCandidate_t *candidate_ptr = candidate_buffer_ptr->candidate_ptr;
 #endif
     // Luma rate
-    uint64_t           lumaRate = 0;
-    uint64_t           chromaRate = 0;
+    uint32_t           lumaRate = 0;
+    uint32_t           chromaRate = 0;
     uint64_t           mvRate = 0;
     uint64_t           skipModeRate;
     // Luma and chroma distortion
@@ -1225,7 +1225,7 @@ EbErrorType av1_inter_fast_cost(
     uint64_t             chromaSad;
     uint64_t           totalDistortion;
 
-    uint64_t           rate;
+    uint32_t           rate;
 
     int16_t           predRefX;
     int16_t           predRefY;
