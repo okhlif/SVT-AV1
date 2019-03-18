@@ -3494,7 +3494,7 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
 
 // Fast approximate the modelling function.
     if (0/*cpi->sf.simple_model_rd_from_var*/) {
-        int64_t square_error = sse;
+        int64_t square_error = (uint64_t)sse;
         quantizer = quantizer >> dequant_shift;
 
         if (quantizer < 120)
@@ -3502,13 +3502,13 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
             (16 - AV1_PROB_COST_SHIFT));
         else
             *rate = 0;
-        *dist = (square_error * quantizer) >> 8;
+        *dist = (uint64_t)(square_error * quantizer) >> 8;
     }
     else {
 
-        av1_model_rd_from_var_lapndz(sse, num_pels_log2_lookup[bsize],
-            quantizer >> dequant_shift, rate,
-            dist);
+        av1_model_rd_from_var_lapndz((uint64_t)sse, num_pels_log2_lookup[bsize],
+            quantizer >> dequant_shift, (int32_t*)rate,
+            (int64_t*)dist);
     }
 
     *dist <<= 4;
