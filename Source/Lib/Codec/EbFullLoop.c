@@ -697,7 +697,9 @@ void av1_quantize_inv_quantize_ii(
 {
     (void)clean_sparse_coeff_flag;
     (void)enable_contouring_qc_update_flag;
+#if !PF_N2_32X32
     (void)pf_mode;
+#endif
     (void)asm_type;
 #if !ADD_DELTA_QP_SUPPORT
     (void) qp;
@@ -982,18 +984,6 @@ void ProductFullLoop(
         tuOriginIndex = tx_org_x + (tx_org_y * candidateBuffer->residual_ptr->stride_y);
         y_tu_coeff_bits = 0;
 
-#if PF_N2_32X32
-        EbPfMode pf_md_mode;
-        if (context_ptr->blk_geom->txsize[txb_itr] == TX_32X32 && candidateBuffer->candidate_ptr->type == INTER_MODE && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_FALSE) {
-            pf_md_mode = N2_SHAPE;
-        }
-        else {
-            pf_md_mode = DEFAULT_SHAPE;
-        }
-//#if PF_N2_32X32_TX_SEARCH
-//        pf_md_mode = DEFAULT_SHAPE;
-//#endif
-#endif
         // Y: T Q iQ
         av1_estimate_transform(
             &(((int16_t*)candidateBuffer->residual_ptr->buffer_y)[tuOriginIndex]),
@@ -1007,8 +997,8 @@ void ProductFullLoop(
             candidateBuffer->candidate_ptr->transform_type[PLANE_TYPE_Y],
             asm_type,
             PLANE_TYPE_Y,
-#if PF_N2_32X32
-            pf_md_mode);
+#if PF_N2_32X32 // here
+            (context_ptr->blk_geom->txsize[txb_itr] == TX_32X32 && context_ptr->pf_md_mode == PF_N2) ? N2_SHAPE : DEFAULT_SHAPE);
 #else
             context_ptr->pf_md_mode);
 #endif
@@ -1262,18 +1252,6 @@ void ProductFullLoopTxSearch(
         {
             tuOriginIndex = context_ptr->blk_geom->origin_x + (context_ptr->blk_geom->origin_y * candidateBuffer->residual_ptr->stride_y);
             y_tu_coeff_bits = 0;
-#if PF_N2_32X32_TX_SEARCH
-            EbPfMode pf_md_mode;
-            if (context_ptr->blk_geom->txsize[txb_itr] == TX_32X32) {
-                pf_md_mode = N2_SHAPE;
-            }
-            else {
-                pf_md_mode = DEFAULT_SHAPE;
-            }
-#if PF_N2_32X32_TX_SEARCH
-            pf_md_mode = DEFAULT_SHAPE;
-#endif
-#endif
 
             // Y: T Q iQ
             av1_estimate_transform(
@@ -1289,8 +1267,8 @@ void ProductFullLoopTxSearch(
                 tx_type,
                 asm_type,
                 PLANE_TYPE_Y,
-#if PF_N2_32X32_TX_SEARCH
-                pf_md_mode);
+#if PF_N2_32X32
+                DEFAULT_SHAPE);
 #else
                 context_ptr->pf_md_mode);
 #endif
@@ -1491,19 +1469,6 @@ void encode_pass_tx_search(
 
         y_tu_coeff_bits = 0;
 
-#if PF_N2_32X32_TX_SEARCH
-        EbPfMode pf_md_mode;
-        if (context_ptr->blk_geom->txsize[context_ptr->txb_itr] == TX_32X32) {
-            pf_md_mode = N2_SHAPE;
-        }
-        else {
-            pf_md_mode = DEFAULT_SHAPE;
-        }
-#if PF_N2_32X32_TX_SEARCH
-        pf_md_mode = DEFAULT_SHAPE;
-#endif
-#endif
-
         av1_estimate_transform(
             ((int16_t*)residual16bit->buffer_y) + scratchLumaOffset,
             residual16bit->stride_y,
@@ -1516,8 +1481,8 @@ void encode_pass_tx_search(
             tx_type,
             asm_type,
             PLANE_TYPE_Y,
-#if PF_N2_32X32_TX_SEARCH
-            pf_md_mode);
+#if PF_N2_32X32
+            DEFAULT_SHAPE);
 #else
             context_ptr->trans_coeff_shape_luma);
 #endif
@@ -1712,19 +1677,6 @@ void encode_pass_tx_search_hbd(
 
         y_tu_coeff_bits = 0;
 
-#if PF_N2_32X32_TX_SEARCH
-        EbPfMode pf_md_mode;
-        if (context_ptr->blk_geom->txsize[context_ptr->txb_itr] == TX_32X32) {
-            pf_md_mode = N2_SHAPE;
-        }
-        else {
-            pf_md_mode = DEFAULT_SHAPE;
-        }
-#if PF_N2_32X32_TX_SEARCH
-        pf_md_mode = DEFAULT_SHAPE;
-#endif
-#endif
-
         av1_estimate_transform(
             ((int16_t*)residual16bit->buffer_y) + scratchLumaOffset,
             residual16bit->stride_y,
@@ -1737,8 +1689,8 @@ void encode_pass_tx_search_hbd(
             tx_type,
             asm_type,
             PLANE_TYPE_Y,
-#if PF_N2_32X32_TX_SEARCH
-            pf_md_mode);
+#if PF_N2_32X32
+            DEFAULT_SHAPE);
 #else
             context_ptr->trans_coeff_shape_luma);
 #endif
@@ -1941,18 +1893,6 @@ void FullLoop_R(
 
 
             // Cb Transform
-#if PF_N2_32X32
-            EbPfMode pf_md_mode;
-            if (context_ptr->blk_geom->txsize_uv[txb_itr] == TX_32X32) {
-                pf_md_mode = N2_SHAPE;
-            }
-            else {
-                pf_md_mode = DEFAULT_SHAPE;
-            }
-//#if PF_N2_32X32_TX_SEARCH
-//            pf_md_mode = DEFAULT_SHAPE;
-//#endif
-#endif
             av1_estimate_transform(
                 chromaResidualPtr,
                 candidateBuffer->residual_ptr->strideCb,
@@ -1965,8 +1905,8 @@ void FullLoop_R(
                 candidateBuffer->candidate_ptr->transform_type[PLANE_TYPE_UV],
                 asm_type,
                 PLANE_TYPE_UV,
-#if PF_N2_32X32
-                pf_md_mode);
+#if PF_N2_32X32 // here
+                (context_ptr->blk_geom->txsize_uv[txb_itr] == TX_32X32 && context_ptr->pf_md_mode == PF_N2) ? N2_SHAPE : DEFAULT_SHAPE);
 #else
                 correctedPFMode);
 #endif
@@ -2006,18 +1946,6 @@ void FullLoop_R(
                 &(((int16_t*)candidateBuffer->residual_ptr->bufferCr)[tuCrOriginIndex]);
 
             // Cr Transform
-#if PF_N2_32X32
-            EbPfMode pf_md_mode;
-            if (context_ptr->blk_geom->txsize_uv[txb_itr] == TX_32X32) {
-                pf_md_mode = N2_SHAPE;
-            }
-            else {
-                pf_md_mode = DEFAULT_SHAPE;
-            }
-//#if PF_N2_32X32_TX_SEARCH
-//            pf_md_mode = DEFAULT_SHAPE;
-//#endif
-#endif
             av1_estimate_transform(
                 chromaResidualPtr,
                 candidateBuffer->residual_ptr->strideCr,
@@ -2030,8 +1958,8 @@ void FullLoop_R(
                 candidateBuffer->candidate_ptr->transform_type[PLANE_TYPE_UV],
                 asm_type,
                 PLANE_TYPE_UV,
-#if PF_N2_32X32
-                pf_md_mode);
+#if PF_N2_32X32 // here
+                (context_ptr->blk_geom->txsize_uv[txb_itr] == TX_32X32 && context_ptr->pf_md_mode == PF_N2) ? N2_SHAPE : DEFAULT_SHAPE);
 #else
                 correctedPFMode);
 #endif
@@ -2050,7 +1978,9 @@ void FullLoop_R(
                 candidateBuffer->candidate_ptr->candidate_plane[2],
                 asm_type,
                 &(cr_count_non_zero_coeffs[txb_itr]),
+#if !PF_N2_32X32
                 context_ptr->pf_md_mode,
+#endif
                 0,
                 COMPONENT_CHROMA_CR,
 #if QT_10BIT_SUPPORT

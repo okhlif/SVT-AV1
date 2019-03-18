@@ -1533,7 +1533,22 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else        
         context_ptr->interpolation_filter_search_blk_size = 2;
     
-
+#if M9_PF
+    // Set PF MD
+    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+        context_ptr->pf_md_mode = PF_OFF;
+    else {
+        if (picture_control_set_ptr->enc_mode <= ENC_M8) {
+            context_ptr->pf_md_mode = PF_OFF;
+        }
+        else {
+            if (picture_control_set_ptr->temporal_layer_index > 0)
+                context_ptr->pf_md_mode = PF_N2;
+            else 
+                context_ptr->pf_md_mode = PF_OFF;
+        }
+    }
+#endif
 
     return return_error;
 }
