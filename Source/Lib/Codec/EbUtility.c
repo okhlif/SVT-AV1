@@ -30,7 +30,7 @@
 
 #include <immintrin.h>
 
-#ifdef __GNUC__
+#if defined(__linux__)
 __attribute__((optimize("unroll-loops")))
 #endif
 static void eb_memcpy_small(void* dst_ptr, void const* src_ptr, size_t size) {
