@@ -14,7 +14,7 @@
 #include "EbResourceCoordinationProcess.h"
 #include "EbResourceCoordinationResults.h"
 #include "EbTransforms.h"
-#include "EbTime.h"
+#include "EbSvtAv1Time.h"
 
 /************************************************
  * Resource Coordination Context Constructor
@@ -527,7 +527,11 @@ void* resource_coordination_kernel(void *input_ptr)
                     construct_pm_trans_coeff_shaping(sequence_control_set_ptr);
                 }
             }
-
+#if BASE_LAYER_REF
+            sequence_control_set_ptr->max_frame_window_to_ref_islice = (sequence_control_set_ptr->static_config.intra_period_length == -1) ? MAX_FRAMES_TO_REF_I : MIN(MAX_FRAMES_TO_REF_I, sequence_control_set_ptr->static_config.intra_period_length);
+            sequence_control_set_ptr->extra_frames_to_ref_islice = MAX(sequence_control_set_ptr->max_frame_window_to_ref_islice / (1 << sequence_control_set_ptr->static_config.hierarchical_levels) - 1, 0);
+            sequence_control_set_ptr->max_frame_window_to_ref_islice = (sequence_control_set_ptr->extra_frames_to_ref_islice + 1)*(1 << sequence_control_set_ptr->static_config.hierarchical_levels) + 1;
+#endif
         }
 
         //Get a New ParentPCS where we will hold the new inputPicture
@@ -568,8 +572,8 @@ void* resource_coordination_kernel(void *input_ptr)
         picture_control_set_ptr->end_of_sequence_flag = end_of_sequence_flag;
 
         // Set Picture Control Flags
-        picture_control_set_ptr->idr_flag = sequence_control_set_ptr->encode_context_ptr->initial_picture || (picture_control_set_ptr->input_ptr->pic_type == EB_IDR_PICTURE);
-        picture_control_set_ptr->cra_flag = (picture_control_set_ptr->input_ptr->pic_type == EB_I_PICTURE) ? EB_TRUE : EB_FALSE;
+        picture_control_set_ptr->idr_flag = sequence_control_set_ptr->encode_context_ptr->initial_picture || (picture_control_set_ptr->input_ptr->pic_type == EB_AV1_KEY_PICTURE);
+        picture_control_set_ptr->cra_flag = (picture_control_set_ptr->input_ptr->pic_type == EB_AV1_INTRA_ONLY_PICTURE) ? EB_TRUE : EB_FALSE;
         picture_control_set_ptr->scene_change_flag = EB_FALSE;
         picture_control_set_ptr->qp_on_the_fly = EB_FALSE;
         picture_control_set_ptr->sb_total_count = sequence_control_set_ptr->sb_total_count;
