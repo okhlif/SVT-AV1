@@ -31,7 +31,9 @@
 #include <immintrin.h>
 
 #if defined(__linux__)
+#ifndef __clang__
 __attribute__((optimize("unroll-loops")))
+#endif
 #endif
 static void eb_memcpy_small(void* dst_ptr, void const* src_ptr, size_t size) {
 
