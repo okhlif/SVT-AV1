@@ -3476,7 +3476,7 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
     }
 }
 
-/*static*/ void model_rd_from_sse(
+/*static*/extern void model_rd_from_sse(
     block_size bsize,
     int16_t quantizer,
     //const AV1_COMP *const cpi,
