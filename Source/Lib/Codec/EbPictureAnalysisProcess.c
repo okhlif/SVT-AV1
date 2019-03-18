@@ -4989,9 +4989,6 @@ void* picture_analysis_kernel(void *input_ptr)
             sequence_control_set_ptr);
 
 
-#if HARD_CODE_SC_SETTING
-        picture_control_set_ptr->sc_content_detected = EB_TRUE;
-#endif
 
         // Pad pictures to multiple min cu size
         PadPictureToMultipleOfMinCuSizeDimensions(
@@ -5050,6 +5047,10 @@ void* picture_analysis_kernel(void *input_ptr)
         }
 #endif
 
+#endif
+        
+#if HARD_CODE_SC_SETTING
+        picture_control_set_ptr->sc_content_detected = EB_TRUE;
 #endif
         // Hold the 64x64 variance and mean in the reference frame
         uint32_t sb_index;

@@ -35,14 +35,10 @@
 extern "C" {
 #endif
     
-
-     //Mode definition : Only one mode should be ON at a time
-
 #define QUICK_ME_CLEANUP        1
 #define SCENE_CONTENT_SETTINGS  1
 
 #define HARD_CODE_SC_SETTING    0
-#define ADP_WIKI                0
 
 #define M8_SKIP_BLK             1  
 #define M8_OIS                  1  

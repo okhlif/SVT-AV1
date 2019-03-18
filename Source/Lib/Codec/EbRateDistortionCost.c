@@ -521,7 +521,7 @@ uint64_t av1_cost_coeffs_txb(
     }
     return cost;
 }
-    extern /*static*/ void model_rd_for_sb(
+    /*static*/ void model_rd_for_sb(
 
     PictureControlSet_t *picture_control_set_ptr,
     EbPictureBufferDesc_t *prediction_ptr,
