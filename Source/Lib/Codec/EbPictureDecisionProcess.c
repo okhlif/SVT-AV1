@@ -1172,6 +1172,13 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->enable_two_fast_loops = 1;
           
 #endif
+
+#if M9_CU_8x8
+        if (picture_control_set_ptr->enc_mode <= ENC_M8)
+            picture_control_set_ptr->cu8x8_mode = CU_8x8_MODE_0;
+        else
+            picture_control_set_ptr->cu8x8_mode = CU_8x8_MODE_1;
+#endif
     return return_error;
 }
 
@@ -2347,9 +2354,10 @@ void* picture_decision_kernel(void *input_ptr)
 
                             // Set the default settings of  subpel
 #if M9_SUBPEL
-                            if (picture_control_set_ptr->sc_content_detected)
-                                picture_control_set_ptr->use_subpel_flag = 1;
-                            else {
+                            //if (picture_control_set_ptr->sc_content_detected)
+                            //    picture_control_set_ptr->use_subpel_flag = 1;
+                            //else 
+                            {
                                 if (picture_control_set_ptr->enc_mode <= ENC_M8)
                                     picture_control_set_ptr->use_subpel_flag = 1;
                                 else
@@ -2377,8 +2385,9 @@ void* picture_decision_kernel(void *input_ptr)
                             picture_control_set_ptr->enable_in_loop_motion_estimation_flag = sequence_control_set_ptr->static_config.in_loop_me_flag && picture_control_set_ptr->slice_type != I_SLICE ? EB_TRUE : EB_FALSE;
 #endif
                             picture_control_set_ptr->limit_ois_to_dc_mode_flag = EB_FALSE;
+#if !M9_CU_8x8
                             picture_control_set_ptr->cu8x8_mode = CU_8x8_MODE_0;
-
+#endif
                             // Update the Dependant List Count - If there was an I-frame or Scene Change, then cleanup the Picture Decision PA Reference Queue Dependent Counts
                             if (picture_control_set_ptr->slice_type == I_SLICE)
                             {

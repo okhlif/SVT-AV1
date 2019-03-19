@@ -400,7 +400,7 @@ extern "C" {
 
 #if M0_SAD_HALF_QUARTER_PEL_BIPRED_SEARCH || M0_SSD_HALF_QUARTER_PEL_BIPRED_SEARCH
 #if M0_SSD_HALF_QUARTER_PEL_BIPRED_SEARCH
-        uint8_t   fractionalSearchMethod;
+        uint8_t                       fractionalSearchMethod;
 #else
         EbBool useSubSadFracBipredSearch;
 #endif
@@ -409,6 +409,9 @@ extern "C" {
         EbBool                        fractional_search64x64;
 #endif
 
+#if M9_SUBPEL_SELECTION
+        uint8_t                       fractional_search_model;
+#endif
         // ME
 #if QUICK_ME_CLEANUP
         uint16_t                      search_area_width;

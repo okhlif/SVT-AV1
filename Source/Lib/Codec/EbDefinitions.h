@@ -163,7 +163,7 @@ extern "C" {
 
 
 // M9 settings toward 4K 60 fps
-#define M9_SETTINGS             1
+#define M9_SETTINGS              1
 
 #if M9_SETTINGS
 // Adopted
@@ -181,6 +181,8 @@ extern "C" {
 #define M9_CHROMA                0   // VP9 4K chroma settings; shut cfl @ ep
 #define M9_ADP                   0   // VP9 4K ADP budget;  (121,110,100 but different injection) (budget = f (layer index))      
 
+#define M9_SUBPEL_SELECTION      0
+#define M9_CU_8x8                0
 
 #endif
 

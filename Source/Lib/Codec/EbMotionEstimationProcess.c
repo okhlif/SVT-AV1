@@ -198,6 +198,35 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->fractionalSearchMethod = FULL_SAD_SEARCH;
 #endif
 
+#if M9_FRAC_ME_SEARCH_64x64
+    //if (picture_control_set_ptr->sc_content_detected)
+    //    context_ptr->fractional_search64x64 = EB_TRUE;
+    //else 
+    {
+        if (picture_control_set_ptr->enc_mode <= ENC_M8)
+            context_ptr->me_context_ptr->fractional_search64x64 = EB_TRUE;
+        else
+            context_ptr->me_context_ptr->fractional_search64x64 = EB_FALSE;
+    }
+#endif
+
+#if M9_SUBPEL_SELECTION
+    // Set fractional search model
+    // 0: search all blocks 
+    // 1: selective based on Full-Search SAD & MV.
+    // 2: off
+    if (picture_control_set_ptr->use_subpel_flag == 1) {
+        if (picture_control_set_ptr->enc_mode <= ENC_M8) {
+            context_ptr->me_context_ptr->fractional_search_model = 0;
+        }
+        else {
+            context_ptr->me_context_ptr->fractional_search_model = 1;
+        }
+    }
+    else {
+        context_ptr->me_context_ptr->fractional_search_model = 2;
+    }
+#endif
     return return_error;
 };
 /************************************************
