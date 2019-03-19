@@ -31,7 +31,6 @@
 #include "aom_dsp_rtcd.h"
 #include "EbCodingLoop.h"
 
-static const uint32_t me2Nx2NOffset[4] = { 0, 1, 5, 21 };
 extern void av1_predict_intra_block(
 #if TILES   
     TileInfo                    *tile,

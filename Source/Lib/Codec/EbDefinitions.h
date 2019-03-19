@@ -120,7 +120,7 @@ extern "C" {
 #define FIX_DEBUG_CRASH                                 1
 #define FIX_47                                          1 // interdepth decision to be tedted block aware
 #define HME_ENHANCED_CENTER_SEARCH                      1
-#define TUNE_CHROMA_OFFSET                              1
+#define TUNE_CHROMA_OFFSET                              0
 #define FAST_TX_SEARCH                                  1
 #define MACRO_BLOCK_CLEANUP                             1
 #define DISABLE_NSQ_FOR_NON_REF                         1

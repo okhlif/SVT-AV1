@@ -57,45 +57,8 @@ PARTITION_SPLIT
 
 };
 
-static const uint32_t intraModeAngularTable[] = {
-    0,
-    2,
-    5,
-    9,
-    13,
-    17,
-    21,
-    26,
-    32
-};
-static const int32_t intraModeAngularTableNegative[] = {
-    0,
-    -2,
-    -5,
-    -9,
-    -13,
-    -17,
-    -21,
-    -26,
-    -32
-};
-
-static const uint32_t invIntraModeAngularTable[] = {
-    0,
-    4096,
-    1638,
-    910,
-    630,
-    482,
-    390,
-    315,
-    256
-};
-
 #define MIDRANGE_VALUE_8BIT    128
 #define MIDRANGE_VALUE_10BIT   512
-
-
 
 /**********************************************
  * Intra Reference Samples Ctor

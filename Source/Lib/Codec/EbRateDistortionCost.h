@@ -240,7 +240,7 @@ extern "C" {
         uint64_t                                 *y_coeff_bits,
         uint64_t                                 *cb_coeff_bits,
         uint64_t                                 *cr_coeff_bits,
-        block_size                              bsize);
+        block_size                                bsize);
 
 #ifdef __cplusplus
 }

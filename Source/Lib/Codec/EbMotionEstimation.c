@@ -56,18 +56,10 @@ int32_t OisPointTh[3][MAX_TEMPORAL_LAYERS][OIS_TH_COUNT] = {
     }
 };
 
-
-
-
-
 #define AVCCODEL
 /********************************************
 * Constants
 ********************************************/
-
-static const uint8_t numberOfOisModePoints[5/*IOS poitnt*/] = {
-    1, 3, 5, 7, 9
-};
 
 #define MAX_INTRA_IN_MD   9
 #if !OIS_BASED_INTRA

@@ -2258,16 +2258,10 @@ void* picture_decision_kernel(void *input_ptr)
                                     picture_control_set_ptr->skip_mode_flag = 0;
                                 }
                                 else if (picture_control_set_ptr->temporal_layer_index == 0) {
-                                    if (picture_control_set_ptr->ref_pic_poc_array[0] == picture_control_set_ptr->ref_pic_poc_array[1])
-                                        picture_control_set_ptr->is_skip_mode_allowed = 0;
-                                    else
-                                        picture_control_set_ptr->is_skip_mode_allowed = 1;
-
                                     picture_control_set_ptr->reference_mode = REFERENCE_MODE_SELECT;
                                     picture_control_set_ptr->skip_mode_flag = 0;
                                 }
                                 else {
-
                                     picture_control_set_ptr->reference_mode = REFERENCE_MODE_SELECT;
                                     picture_control_set_ptr->is_skip_mode_allowed = 1;
                                     picture_control_set_ptr->skip_mode_flag = 1;
