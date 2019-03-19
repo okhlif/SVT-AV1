@@ -177,8 +177,7 @@ extern "C" {
 #define M9_TX_SEARCH             0   // Tx search off
 #define M9_CHROMA                0   // VP9 4K chroma settings; shut cfl @ ep
 #define M9_ADP                   0   // VP9 4K ADP budget;  (121,110,100 but different injection) (budget = f (layer index))      
-
-#define M9_FULL_LOOP_ESCAPE      0
+#define M9_FULL_LOOP_ESCAPE      0   // Enhanced full loop escape
 
 #endif
 

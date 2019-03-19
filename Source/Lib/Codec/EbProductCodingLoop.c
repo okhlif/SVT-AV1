@@ -2576,9 +2576,11 @@ void AV1PerformFullLoop(
     //      printf("NOPPPP");
 
     for (fullLoopCandidateIndex = 0; fullLoopCandidateIndex < fullCandidateTotalCount; ++fullLoopCandidateIndex) {
-
+#if M9_FULL_LOOP_ESCAPE
+        candidateIndex = (context_ptr->full_loop_escape == 2) ? context_ptr->sorted_candidate_index_array[fullLoopCandidateIndex]: context_ptr->best_candidate_index_array[fullLoopCandidateIndex];
+#else
         candidateIndex = context_ptr->best_candidate_index_array[fullLoopCandidateIndex];
-
+#endif
 #if USED_NFL_FEATURE_BASED
         uint8_t best_fastLoop_candidate_index = context_ptr->sorted_candidate_index_array[fullLoopCandidateIndex];
 #endif
@@ -3986,7 +3988,11 @@ void md_encode_block(
 #else
             fullCandidateTotalCount,
 #endif
+#if M9_FULL_LOOP_ESCAPE
+            (context_ptr->full_loop_escape == 2) ? context_ptr->sorted_candidate_index_array : context_ptr->best_candidate_index_array,
+#else
             context_ptr->best_candidate_index_array,
+#endif
             &best_intra_mode);
 
         candidateBuffer = candidate_buffer_ptr_array[candidateIndex];

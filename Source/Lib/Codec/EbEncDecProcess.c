@@ -1359,7 +1359,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if SCENE_CONTENT_SETTINGS
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
-        
+
         if (picture_control_set_ptr->enc_mode == ENC_M0)
             context_ptr->nfl_level = 0;
         else if (picture_control_set_ptr->enc_mode <= ENC_M3)
@@ -1372,33 +1372,33 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else {
 #endif
-    if (picture_control_set_ptr->enc_mode == ENC_M0)
-        context_ptr->nfl_level = 0;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M1)
-        if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+        if (picture_control_set_ptr->enc_mode == ENC_M0)
             context_ptr->nfl_level = 0;
-        else
-            context_ptr->nfl_level = 1;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M3)
-        if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-            context_ptr->nfl_level = 0;
-        else
-            context_ptr->nfl_level = 2;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M5)
-        if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-            context_ptr->nfl_level = 2;
-        else
+        else if (picture_control_set_ptr->enc_mode <= ENC_M1)
+            if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+                context_ptr->nfl_level = 0;
+            else
+                context_ptr->nfl_level = 1;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M3)
+            if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+                context_ptr->nfl_level = 0;
+            else
+                context_ptr->nfl_level = 2;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M5)
+            if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+                context_ptr->nfl_level = 2;
+            else
+                context_ptr->nfl_level = 3;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M7)
             context_ptr->nfl_level = 3;
-    else if(picture_control_set_ptr->enc_mode <= ENC_M7)
-        context_ptr->nfl_level = 3;
 #if M9_NFL
-    else if (picture_control_set_ptr->enc_mode <= ENC_M8)
-        context_ptr->nfl_level = 4;
-    else 
-        context_ptr->nfl_level = 5;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M8)
+            context_ptr->nfl_level = 4;
+        else
+            context_ptr->nfl_level = 5;
 #else
-    else
-        context_ptr->nfl_level = 4;
+        else
+            context_ptr->nfl_level = 4;
 #endif
 #if SCENE_CONTENT_SETTINGS
     }
@@ -1425,16 +1425,16 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->chroma_level = (sequence_control_set_ptr->encoder_bit_depth == EB_8BIT) ?
             CHROMA_MODE_1 :
             CHROMA_MODE_2;
-        else 
+        else
             context_ptr->chroma_level = CHROMA_MODE_2;
     }
 #else
     if (picture_control_set_ptr->enc_mode <= ENC_M4)
         context_ptr->chroma_level = CHROMA_MODE_0;
-    else 
+    else
         context_ptr->chroma_level = (sequence_control_set_ptr->encoder_bit_depth == EB_8BIT) ?
-            CHROMA_MODE_1 :
-            CHROMA_MODE_2 ;
+        CHROMA_MODE_1 :
+        CHROMA_MODE_2;
 #endif
 
 #endif
@@ -1443,17 +1443,18 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Hsan: FULL_SAD_SEARCH not supported
 #if SCENE_CONTENT_SETTINGS
 
-    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected){
-	    if (picture_control_set_ptr->enc_mode <= ENC_M0)
-	        context_ptr->decoupled_fast_loop_search_method = SSD_SEARCH;
-	    else
-	        context_ptr->decoupled_fast_loop_search_method = FULL_SAD_SEARCH;
-	}else
-#endif
-    if (picture_control_set_ptr->enc_mode <= ENC_M5)
-        context_ptr->decoupled_fast_loop_search_method = SSD_SEARCH;
+    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
+        if (picture_control_set_ptr->enc_mode <= ENC_M0)
+            context_ptr->decoupled_fast_loop_search_method = SSD_SEARCH;
+        else
+            context_ptr->decoupled_fast_loop_search_method = FULL_SAD_SEARCH;
+    }
     else
-        context_ptr->decoupled_fast_loop_search_method = FULL_SAD_SEARCH;
+#endif
+        if (picture_control_set_ptr->enc_mode <= ENC_M5)
+            context_ptr->decoupled_fast_loop_search_method = SSD_SEARCH;
+        else
+            context_ptr->decoupled_fast_loop_search_method = FULL_SAD_SEARCH;
 #endif
 #if FULL_LOOP_ESCAPE
     // Set the full loop escape level
@@ -1461,11 +1462,27 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 0                    Off
     // 1                    On but only INTRA
     // 2                    On both INTRA and INTER
+#if M9_FULL_LOOP_ESCAPE
+    if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
+        if (picture_control_set_ptr->enc_mode <= ENC_M7)
+            context_ptr->full_loop_escape = 0;
+        else
+            context_ptr->full_loop_escape = 1;
+    }
+    else {   
+        if (picture_control_set_ptr->enc_mode <= ENC_M7)
+            context_ptr->full_loop_escape = 0;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M8)
+            context_ptr->full_loop_escape = 1;
+        else 
+            context_ptr->full_loop_escape = 2;
+    }
+#else
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
         context_ptr->full_loop_escape = 0;
     else
         context_ptr->full_loop_escape = 1;
-
+#endif
 #endif
 #if SHUT_GLOBAL_MV
     // Set global MV injection
