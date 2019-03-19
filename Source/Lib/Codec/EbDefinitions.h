@@ -173,16 +173,11 @@ extern "C" {
 #define M9_NFL                   0   // VP9 4K NFL settings; NFL = 3 
 #define M9_HME_ME                0   // VP9 4K HME/ME, HME (L0 only 48x32), ME (16x9)
 #define M9_PF                    0   // VP9 4K PF settings N2 is 32x32, and non-base
-
-
 #define M9_CDEF                  0   // CDEF off
 #define M9_TX_SEARCH             0   // Tx search off
-
-
-
 #define M9_CHROMA                0   // VP9 4K chroma settings; shut cfl @ ep
+#define M9_ADP                   0   // VP9 4K ADP budget;  (121,110,100 but different injection) (budget = f (layer index))      
 
-#define M9_ADP                   0   // VP9 4K ADP budget;  (121,110,100 but different injection) (budget = f (layer index))                             
 #define M9_FULL_LOOP_ESCAPE      0
 
 #endif
