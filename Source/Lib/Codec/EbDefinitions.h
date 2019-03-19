@@ -227,6 +227,16 @@ extern "C" {
 #define SC_HME_ME  0//use sc detector for hme/me setting
 
 #define AOM_INTERP_EXTEND 4
+#define NFL_PER_SQ_SIZE  1
+
+#if NFL_PER_SQ_SIZE
+#define   NFL_CAP_4x4     12
+#define   NFL_CAP_8x8     12
+#define   NFL_CAP_16x16   12
+#define   NFL_CAP_32x32   12
+#define   NFL_CAP_64x64   12
+#define   NFL_CAP_128x128 12
+#endif
 struct buf_2d {
     uint8_t *buf;
     uint8_t *buf0;
