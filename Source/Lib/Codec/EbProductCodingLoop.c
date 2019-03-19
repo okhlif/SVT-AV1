@@ -666,29 +666,47 @@ void set_nfl(
     LargestCodingUnit_t       *sb_ptr) {
 #endif
 
-    // Set NFL Candidates
-    // NFL Level MD         Settings
-    // 0                    MAX_NFL 12
-    // 1                    10
-    // 2                    8
-    // 3                    6
-    // 4                    6/4
+    // NFL Level MD       Settings
+    // 0                  MAX_NFL 40
+    // 1                  30
+    // 2                  12
+    // 3                  10
+    // 4                  8
+    // 5                  6
+    // 6                  4  
+    // 7                  3 
 #if M8_ADP
-    if (context_ptr->nfl_level == 0)
+    
+    switch (context_ptr->nfl_level) {
+   case 0:
         context_ptr->full_recon_search_count = MAX_NFL;
-    else if (context_ptr->nfl_level == 1)
+        break;
+    case 1:
+        context_ptr->full_recon_search_count = 30;
+        break;
+    case 2:
+        context_ptr->full_recon_search_count = 12;
+        break;
+    case 3:
         context_ptr->full_recon_search_count = 10;
-    else if (context_ptr->nfl_level == 2)
+        break;
+    case 4:
         context_ptr->full_recon_search_count = 8;
-    else if(context_ptr->nfl_level == 3)
+        break;
+    case 5:
         context_ptr->full_recon_search_count = 6;
-    else
-        if (picture_control_set_ptr->parent_pcs_ptr->slice_type == I_SLICE)
-            context_ptr->full_recon_search_count = 6;
-        else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-            context_ptr->full_recon_search_count = 4;
-        else
-            context_ptr->full_recon_search_count = 3;
+        break;
+    case 6:
+        context_ptr->full_recon_search_count = 4;
+        break;
+    case 7:
+        context_ptr->full_recon_search_count = 3;
+        break;
+    default:
+        context_ptr->full_recon_search_count = 4;
+        break;
+    }
+
 #else
     if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_ptr->index] == SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)
         context_ptr->full_recon_search_count = 1;
@@ -3797,7 +3815,7 @@ void md_encode_block(
             (void*)context_ptr->inter_prediction_context,
             picture_control_set_ptr);
 #if INTRA_INTER_FAST_LOOP
-        EbBool decouple_intra_inter_fast_loop = (context_ptr->blk_geom->sq_size > 4 && context_ptr->blk_geom->shape == PART_N && context_ptr->full_recon_search_count > 1);
+        EbBool decouple_intra_inter_fast_loop = context_ptr->decouple_intra_inter_fast_loop  && (context_ptr->blk_geom->sq_size > 4 && context_ptr->blk_geom->shape == PART_N && context_ptr->full_recon_search_count > 1);
         uint32_t buffer_total_count;
         if (decouple_intra_inter_fast_loop) {
             // Derive fast inter candidates total count

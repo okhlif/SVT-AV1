@@ -262,6 +262,7 @@ extern "C" {
 #endif
 #if INTRA_INTER_FAST_LOOP
         uint8_t                           decoupled_fast_loop_search_method; 
+        uint8_t                           decouple_intra_inter_fast_loop;
 #endif
 #if FULL_LOOP_ESCAPE
         uint8_t                           full_loop_escape;

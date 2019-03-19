@@ -1348,48 +1348,64 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 
     EbErrorType return_error = EB_ErrorNone;
 
-    // NFL Level MD         Settings
-    // 0                    MAX_NFL 12
-    // 1                    10
-    // 2                    8
-    // 3                    6
-    // 4                    6 Intra/4 ref/3 non-ref
+    // NFL Level MD       Settings
+    // 0                  MAX_NFL 40
+    // 1                  30
+    // 2                  12
+    // 3                  10
+    // 4                  8
+    // 5                  6
+    // 6                  4  
+    // 7                  3 
 #if SCENE_CONTENT_SETTINGS
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
         
         if (picture_control_set_ptr->enc_mode == ENC_M0)
-            context_ptr->nfl_level = 0;
-        else if (picture_control_set_ptr->enc_mode <= ENC_M3)
             context_ptr->nfl_level = 2;
-        else if (picture_control_set_ptr->enc_mode <= ENC_M7)
-            context_ptr->nfl_level = 3;
-        else
+        else if (picture_control_set_ptr->enc_mode <= ENC_M3)
             context_ptr->nfl_level = 4;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M7)
+            context_ptr->nfl_level = 5;
+        else
+            if (picture_control_set_ptr->parent_pcs_ptr->slice_type == I_SLICE)
+                context_ptr->nfl_level  = 5;
+            else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+                context_ptr->nfl_level  = 6;
+            else
+                context_ptr->nfl_level  = 7;
 
     }
     else {
 #endif
     if (picture_control_set_ptr->enc_mode == ENC_M0)
-        context_ptr->nfl_level = 0;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M1)
         if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-            context_ptr->nfl_level = 0;
-        else
-            context_ptr->nfl_level = 1;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M3)
-        if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-            context_ptr->nfl_level = 0;
+            context_ptr->nfl_level = (sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) ? 0 : 1;
         else
             context_ptr->nfl_level = 2;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M5)
+    else if (picture_control_set_ptr->enc_mode <= ENC_M1)
         if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
             context_ptr->nfl_level = 2;
         else
             context_ptr->nfl_level = 3;
+    else if (picture_control_set_ptr->enc_mode <= ENC_M3)
+        if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+            context_ptr->nfl_level = 2;
+        else
+            context_ptr->nfl_level = 4;
+    else if (picture_control_set_ptr->enc_mode <= ENC_M5)
+        if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+            context_ptr->nfl_level = 4;
+        else
+            context_ptr->nfl_level = 5;
     else if(picture_control_set_ptr->enc_mode <= ENC_M7)
-        context_ptr->nfl_level = 3;
+        context_ptr->nfl_level = 5;
     else
-        context_ptr->nfl_level = 4;
+        if (picture_control_set_ptr->parent_pcs_ptr->slice_type == I_SLICE)
+            context_ptr->nfl_level  = 5;
+        else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+            context_ptr->nfl_level  = 6;
+        else
+            context_ptr->nfl_level  = 7;
 #if SCENE_CONTENT_SETTINGS
     }
 #endif
@@ -1406,6 +1422,19 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             CHROMA_MODE_1 :
             CHROMA_MODE_2 ;
 #endif
+
+    
+    // Set fast loop method
+    // 1 fast loop: SSD_SEARCH not supported    
+    // Level                Settings
+    //  0                   Collapsed fast loop
+    //  1                   Decoupled fast loops ( intra/inter) 
+
+    if (picture_control_set_ptr->enc_mode == ENC_M0)
+        context_ptr->decouple_intra_inter_fast_loop = 0;
+    else
+        context_ptr->decouple_intra_inter_fast_loop = 1;
+
 #if INTRA_INTER_FAST_LOOP
     // Set the search method when decoupled fast loop is used 
     // Hsan: FULL_SAD_SEARCH not supported
@@ -1468,7 +1497,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Set unipred3x3 injection
     // Level                Settings
     // 0                    OFF
-    // 1                    On
+    // 1                    ON FULL
+    // 2                    Reduced set
 #if SCENE_CONTENT_SETTINGS
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
         if (picture_control_set_ptr->enc_mode == ENC_M0)
@@ -1489,7 +1519,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Set bipred3x3 injection
     // Level                Settings
     // 0                    OFF
-    // 1                    On
+    // 1                    ON FULL
+    // 2                    Reduced set
 #if SCENE_CONTENT_SETTINGS
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
         if (picture_control_set_ptr->enc_mode == ENC_M0)
