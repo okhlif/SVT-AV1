@@ -188,6 +188,7 @@ extern "C" {
 
 #define OPT_LOSSLESS             0
 #define OPT_LOSSY                0
+#define FRAC_64x64_BUG_FIX       0              
 
 
 

@@ -998,7 +998,7 @@ void ProductFullLoop(
             asm_type,
             PLANE_TYPE_Y,
 #if PF_N2_32X32 // here
-            (context_ptr->blk_geom->txsize[txb_itr] == TX_32X32 && context_ptr->pf_md_mode == PF_N2) ? N2_SHAPE : DEFAULT_SHAPE);
+            (context_ptr->blk_geom->txsize[txb_itr] == TX_32X32 && context_ptr->pf_md_mode == PF_N2 && candidateBuffer->candidate_ptr->luma_fast_distortion < 1024) ? N2_SHAPE : DEFAULT_SHAPE);
 #else
             context_ptr->pf_md_mode);
 #endif
