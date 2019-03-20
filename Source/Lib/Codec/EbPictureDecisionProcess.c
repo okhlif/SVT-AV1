@@ -1017,15 +1017,8 @@ EbErrorType signal_derivation_multi_processes_oq(
     if (picture_control_set_ptr->sc_content_detected) 
     if (picture_control_set_ptr->enc_mode <= ENC_M5)
         picture_control_set_ptr->tx_search_level = TX_SEARCH_FULL_LOOP;
-#if M9_TX_SEARCH
-    else if (picture_control_set_ptr->enc_mode <= ENC_M7)
-        picture_control_set_ptr->tx_search_level = TX_SEARCH_ENC_DEC;
-    else
-        picture_control_set_ptr->tx_search_level = TX_SEARCH_OFF;
-#else
     else
         picture_control_set_ptr->tx_search_level = TX_SEARCH_ENC_DEC;
-#endif
 	else
 #endif
 
@@ -1185,7 +1178,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         if (picture_control_set_ptr->enc_mode <= ENC_M8)
             picture_control_set_ptr->cu8x8_mode = CU_8x8_MODE_0;
         else
-            picture_control_set_ptr->cu8x8_mode = CU_8x8_MODE_1;
+            picture_control_set_ptr->cu8x8_mode = (picture_control_set_ptr->temporal_layer_index > 0) ?
+            CU_8x8_MODE_1 :
+            CU_8x8_MODE_0 ;
 #endif
     return return_error;
 }
