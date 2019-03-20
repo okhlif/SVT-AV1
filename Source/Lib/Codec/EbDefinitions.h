@@ -183,9 +183,26 @@ extern "C" {
 
 #define M9_SUBPEL_SELECTION      0
 #define M9_CU_8x8                0
+#define M9_NON_UNIFORM_NFL       0   // Non-uniform NFL
 
+
+
+
+
+
+
+#define NFL_PER_SQ_SIZE          0
+
+#if NFL_PER_SQ_SIZE
+#define   NFL_CAP_4x4     12
+#define   NFL_CAP_8x8     12
+#define   NFL_CAP_16x16   12
+#define   NFL_CAP_32x32   12
+#define   NFL_CAP_64x64   12
+#define   NFL_CAP_128x128 12
 #endif
 
+#endif
 
 #define FULL_LOOP_ESCAPE                                1
 #define SIMULATE_PF_N2                                  0

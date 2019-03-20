@@ -1366,8 +1366,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->nfl_level = 2;
         else if (picture_control_set_ptr->enc_mode <= ENC_M7)
             context_ptr->nfl_level = 3;
+#if M9_NFL || M9_NON_UNIFORM_NFL
+        else if (picture_control_set_ptr->enc_mode <= ENC_M8)
+            context_ptr->nfl_level = 4;
+        else
+            context_ptr->nfl_level = 5;
+#else
         else
             context_ptr->nfl_level = 4;
+#endif
 
     }
     else {
@@ -1391,7 +1398,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                 context_ptr->nfl_level = 3;
         else if (picture_control_set_ptr->enc_mode <= ENC_M7)
             context_ptr->nfl_level = 3;
-#if M9_NFL
+#if M9_NFL || M9_NON_UNIFORM_NFL
         else if (picture_control_set_ptr->enc_mode <= ENC_M8)
             context_ptr->nfl_level = 4;
         else

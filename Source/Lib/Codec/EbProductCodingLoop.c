@@ -653,9 +653,45 @@ void md_update_all_neighbour_arrays_multiple(
 
 //*************************//
 // set_nfl
-// Based on the MDStage and the encodeMode
-// the NFL candidates numbers are set
 //*************************//
+#if NFL_PER_SQ_SIZE
+uint32_t nfl_cap_table[6] = {
+    NFL_CAP_4x4,
+    NFL_CAP_8x8,
+    NFL_CAP_16x16,
+    NFL_CAP_32x32,
+    NFL_CAP_64x64,
+    NFL_CAP_128x128
+};
+#endif
+#if M9_NON_UNIFORM_NFL
+int8_t nfl_shaving_offset[3][6] = {
+    {
+        -4,      // G
+        -2,      // P
+         0,      // R
+        -1,      // P
+        -2,      // Y
+        -3       // B
+    },
+    {
+        -4,      // G
+        -2,      // P
+         0,      // R
+        -1,      // P
+        -2,      // Y
+        -3       // B
+    },
+    {
+         0,      // G
+         0,      // P
+         0,      // R
+         0,      // P
+         0,      // Y
+         0       // B
+    }
+};
+#endif
 #if ADAPTIVE_DEPTH_PARTITIONING
 void set_nfl(
     ModeDecisionContext_t     *context_ptr,
@@ -666,17 +702,26 @@ void set_nfl(
     LargestCodingUnit_t       *sb_ptr) {
 #endif
 
+
+#if M9_NON_UNIFORM_NFL || NFL_PER_SQ_SIZE
+    uint8_t nfl_index = LOG2F(context_ptr->blk_geom->sq_size) - 2;
+#endif
+
     // Set NFL Candidates
     // NFL Level MD         Settings
     // 0                    MAX_NFL 12
     // 1                    10
     // 2                    8
     // 3                    6
-    // 4                    6/4
+    // 4                    6/4/3
+#if M9_NON_UNIFORM_NFL
+    // 5                    non-linear 6/4/3             
+#endif
 #if M9_NFL
     // 5                    3
 #endif
 #if M8_ADP
+
     if (context_ptr->nfl_level == 0)
         context_ptr->full_recon_search_count = MAX_NFL;
     else if (context_ptr->nfl_level == 1)
@@ -685,7 +730,7 @@ void set_nfl(
         context_ptr->full_recon_search_count = 8;
     else if(context_ptr->nfl_level == 3)
         context_ptr->full_recon_search_count = 6;
-#if M9_NFL
+#if M9_NFL || M9_NON_UNIFORM_NFL
     else if (context_ptr->nfl_level == 4)
 #else
     else
@@ -696,6 +741,15 @@ void set_nfl(
             context_ptr->full_recon_search_count = 4;
         else
             context_ptr->full_recon_search_count = 3;
+#if M9_NON_UNIFORM_NFL
+    else 
+        if (picture_control_set_ptr->parent_pcs_ptr->slice_type == I_SLICE)
+            context_ptr->full_recon_search_count = 6;
+        else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+            context_ptr->full_recon_search_count = (uint32_t) MIN(1, 4 + nfl_shaving_offset[nfl_index]);
+        else
+            context_ptr->full_recon_search_count = (uint32_t) MIN(1, 3 + nfl_shaving_offset[nfl_index]);
+#endif
 #if M9_NFL
     else 
         context_ptr->full_recon_search_count = 3;
@@ -713,6 +767,15 @@ void set_nfl(
         else
             context_ptr->full_recon_search_count = 6;
 #endif
+
+
+#if NFL_PER_SQ_SIZE
+    if (picture_control_set_ptr->slice_type != I_SLICE) {
+        uint32_t nfl_cap = nfl_cap_table[nfl_index];
+        context_ptr->full_recon_search_count = nfl_cap;
+    }
+#endif
+
     ASSERT(context_ptr->full_recon_search_count <= MAX_NFL);
 }
 #else
